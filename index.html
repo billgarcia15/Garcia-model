@@ -77,7 +77,9 @@ a{color:var(--teal);text-decoration:none}
 /* ── HOLDINGS TABLE ── */
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
-.tbl th:hover{color:var(--text2)}
+.sort-ind{font-size:9px;opacity:0.4;margin-left:2px}
+.tbl th.sorted{color:var(--teal)}
+.tbl th.sorted .sort-ind{opacity:1;color:var(--teal)}
 .tbl th.r,.tbl td.r{text-align:right}
 .tbl td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;white-space:nowrap}
 .tbl tr:last-child td{border-bottom:none}
@@ -176,7 +178,9 @@ a{color:var(--teal);text-decoration:none}
 <nav class="nav">
   <div class="nav-logo">GARCIA <em>MODEL</em></div>
   <div class="nav-tab active"  onclick="go('overview',this)">Overview</div>
+  <div class="nav-tab"         onclick="go('performance',this)">Performance</div>
   <div class="nav-tab"         onclick="go('holdings',this)">Holdings</div>
+  <div class="nav-tab"         onclick="go('performance',this)">Performance</div>
   <div class="nav-tab"         onclick="go('allocation',this)">Allocation</div>
   <div class="nav-tab"         onclick="go('whatif',this)">What-If</div>
   <div class="nav-tab"         onclick="go('montecarlo',this)">Monte Carlo</div>
@@ -232,10 +236,6 @@ a{color:var(--teal);text-decoration:none}
         </div>
       </div>
       <div class="card" style="margin-top:12px">
-        <div class="card-hd">Factor exposure <span class="sub">vs plain index</span></div>
-        <div style="display:flex;justify-content:center"><canvas id="radar" width="220" height="220"></canvas></div>
-      </div>
-      <div class="card" style="margin-top:12px">
         <div class="card-hd">Today's movers <span class="sub">from your holdings</span></div>
         <div id="movers">Awaiting live prices…</div>
       </div>
@@ -257,15 +257,18 @@ a{color:var(--teal);text-decoration:none}
     <div style="overflow-x:auto">
     <table class="tbl">
       <thead><tr>
-        <th onclick="sortBy('t')">Ticker</th>
-        <th>Classification</th>
-        <th class="r" onclick="sortBy('sh')">Shares</th>
-        <th class="r" onclick="sortBy('price')">Price</th>
-        <th class="r" onclick="sortBy('val')">Value</th>
-        <th class="r" onclick="sortBy('wt')">Weight</th>
-        <th class="r" onclick="sortBy('pct')">Day %</th>
+        <th onclick="sortBy('t')">Ticker <span class="sort-arrow" id="hs-t"></span></th>
+        <th onclick="sortBy('cls')">Classification <span class="sort-arrow" id="hs-cls"></span></th>
+        <th onclick="sortBy('acct')">Account <span class="sort-arrow" id="hs-acct"></span></th>
+        <th onclick="sortBy('tax')">Tax Status <span class="sort-arrow" id="hs-tax"></span></th>
+        <th class="r" onclick="sortBy('price')">Price <span class="sort-arrow" id="hs-price"></span></th>
+        <th class="r" onclick="sortBy('val')">Value <span class="sort-arrow" id="hs-val"></span></th>
+        <th class="r" onclick="sortBy('wt')">Weight <span class="sort-arrow" id="hs-wt"></span></th>
+        <th class="r" onclick="sortBy('cb')">Cost Basis <span class="sort-arrow" id="hs-cb"></span></th>
+        <th class="r" onclick="sortBy('gainpct')">Gain % <span class="sort-arrow" id="hs-gainpct"></span></th>
+        <th class="r" onclick="sortBy('pct')">Day % <span class="sort-arrow" id="hs-daypct"></span></th>
         <th class="r">ER</th>
-        <th style="width:80px">Bar</th>
+        <th style="width:70px">Bar</th>
       </tr></thead>
       <tbody id="h-body"></tbody>
     </table>
@@ -273,7 +276,54 @@ a{color:var(--teal);text-decoration:none}
   </div>
 </div>
 
-<!-- ═══ ALLOCATION ═══ -->
+<!-- ═══ PERFORMANCE ═══ -->
+<div class="page" id="page-performance">
+  <div class="metrics">
+    <div class="m"><div class="m-lbl">Total Value</div><div class="m-val" id="pf-total">—</div><div class="m-sub">65 positions</div></div>
+    <div class="m"><div class="m-lbl">Total Cost Basis</div><div class="m-val" id="pf-basis">—</div><div class="m-sub">amount invested</div></div>
+    <div class="m"><div class="m-lbl">Unrealized Gain</div><div class="m-val" id="pf-gain">—</div><div class="m-sub" id="pf-gainpct">—</div></div>
+    <div class="m"><div class="m-lbl">Best Performer</div><div class="m-val pos" id="pf-best">—</div><div class="m-sub" id="pf-bestsub">—</div></div>
+    <div class="m"><div class="m-lbl">Worst Performer</div><div class="m-val neg" id="pf-worst">—</div><div class="m-sub" id="pf-worstsub">—</div></div>
+  </div>
+
+  <!-- Classification breakdown with drill-down -->
+  <div class="g2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-hd">Performance by classification <span class="sub">click any row to see underlying holdings</span></div>
+      <div id="perf-by-cls"></div>
+    </div>
+    <div class="card" id="cls-drill-card" style="display:none">
+      <div class="card-hd" id="cls-drill-title">Holdings — <span class="sub"></span></div>
+      <div id="cls-drill-body"></div>
+    </div>
+  </div>
+
+  <!-- Full holdings performance table -->
+  <div class="card">
+    <div class="card-hd">All holdings — performance detail <span class="sub">cost basis · unrealized P&L · return % · click header to sort</span></div>
+    <div style="overflow-x:auto">
+    <table class="tbl">
+      <thead><tr>
+        <th onclick="sortPF('t')" id="pfh-t">Ticker <span class="sort-ind"></span></th>
+        <th onclick="sortPF('n')">Name</th>
+        <th onclick="sortPF('cls')" id="pfh-cls">Classification <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('sh')" id="pfh-sh">Shares <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('cost')" id="pfh-cost">Cost/Sh <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('basis')" id="pfh-basis">Cost Basis <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('price')" id="pfh-price">Price <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('val')" id="pfh-val">Value <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('gl')" id="pfh-gl">Gain / Loss <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('glpct')" id="pfh-glpct">Return % <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('wt')" id="pfh-wt">Weight <span class="sort-ind"></span></th>
+        <th class="r" onclick="sortPF('daypct')" id="pfh-daypct">Day % <span class="sort-ind"></span></th>
+      </tr></thead>
+      <tbody id="pf-body"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+
 <div class="page" id="page-allocation">
   <div class="g3">
     <div class="card">
@@ -427,64 +477,65 @@ a{color:var(--teal);text-decoration:none}
 // DATA — full holdings with all metadata
 // ════════════════════════════════════════════════════════════
 const H = [
-  {t:'VT',    n:'Vanguard Total World ETF',            sh:294.19, p:141.53, cls:'US Blend',          er:0.07, acct:'Taxable'},
-  {t:'VFIAX', n:'Vanguard 500 Index Admiral',           sh:64.96,  p:613.72, cls:'US Blend',          er:0.04, acct:'401K'},
-  {t:'VXUS',  n:'Vanguard Total Intl Stock ETF',        sh:483.02, p:78.13,  cls:'Intl Developed',    er:0.07, acct:'Taxable'},
+  {t:'VT',    n:'Vanguard Total World ETF',            sh:294.19, p:141.53, cls:'US Blend',          er:0.07, acct:'Taxable', acct:'Rollover IRA', tax:'Non-Taxable', cb:24209.31, gd:17684.97, div:0.032},
+  {t:'VFIAX', n:'Vanguard 500 Index Admiral',           sh:64.96,  p:613.72, cls:'US Blend',          er:0.04, acct:'401K', acct:'Individual', tax:'Taxable', cb:5357.14, gd:10024.19, div:0.0111},
+  {t:'VXUS',  n:'Vanguard Total Intl Stock ETF',        sh:483.02, p:78.13,  cls:'Intl Developed',    er:0.07, acct:'Taxable', acct:'Individual/Roth IRA', tax:'Mixed', cb:26091.64, gd:12016.16, div:0.0711},
   {t:'VEIRX', n:'Vanguard Equity Income Adm.',          sh:261.27, p:94.16,  cls:'US Large Value',    er:0.18, acct:'IRA'},
-  {t:'AAPL',  n:'Apple Inc',                            sh:96.42,  p:253.47, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'VTI',   n:'Vanguard Total Stock Mkt ETF',         sh:73.15,  p:330.00, cls:'US Blend',          er:0.03, acct:'HSA'},
-  {t:'VTV',   n:'Vanguard Value ETF',                   sh:95.58,  p:198.82, cls:'US Large Value',    er:0.04, acct:'Taxable'},
-  {t:'NVDA',  n:'NVIDIA Corp',                          sh:100.31, p:184.57, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'AVUV',  n:'Avantis US Small Cap Value ETF',       sh:168.04, p:107.40, cls:'US Small Value',    er:0.25, acct:'IRA'},
-  {t:'EMXC',  n:'iShares MSCI EM ex China ETF',         sh:211.41, p:80.26,  cls:'Emerging Markets',  er:0.25, acct:'Taxable'},
-  {t:'AMZN',  n:'Amazon.com Inc',                       sh:80,     p:209.41, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'AIRR',  n:'First Trust RBA Industrial ETF',       sh:138.04, p:109.95, cls:'US Industrials',    er:0.70, acct:'Taxable'},
-  {t:'DFIV',  n:'Dimensional Intl Value ETF',           sh:267.18, p:52.38,  cls:'Intl Value',        er:0.27, acct:'401K'},
-  {t:'VB',    n:'Vanguard Small-Cap ETF',               sh:46.56,  p:264.19, cls:'US Small Blend',    er:0.05, acct:'Taxable'},
-  {t:'INFL',  n:'Horizon Kinetics Inflation ETF',       sh:231.99, p:52.38,  cls:'Real Assets',       er:0.85, acct:'Taxable'},
-  {t:'XBI',   n:'SPDR S&P Biotech ETF',                 sh:95.44,  p:124.24, cls:'Biotech',           er:0.35, acct:'Taxable'},
+  {t:'AAPL',  n:'Apple Inc',                            sh:96.42,  p:253.47, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Individual', tax:'Taxable', cb:3353.88, gd:21147.99, div:0.0042},
+  {t:'VTI',   n:'Vanguard Total Stock Mkt ETF',         sh:73.15,  p:330.00, cls:'US Blend',          er:0.03, acct:'HSA', acct:'Roth IRA', tax:'Non-Taxable', cb:17568.02, gd:5337.31, div:0.0117},
+  {t:'VTV',   n:'Vanguard Value ETF',                   sh:95.58,  p:198.82, cls:'US Large Value',    er:0.04, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:13538.97, gd:5579.84, div:0.02},
+  {t:'NVDA',  n:'NVIDIA Corp',                          sh:100.31, p:184.57, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1212.08, gd:17077.0, div:0.0002},
+  {t:'AVUV',  n:'Avantis US Small Cap Value ETF',       sh:168.04, p:107.40, cls:'US Small Value',    er:0.25, acct:'IRA', acct:'Roth IRA', tax:'Non-Taxable', cb:12790.22, gd:5362.16, div:0.0105},
+  {t:'EMXC',  n:'iShares MSCI EM ex China ETF',         sh:211.41, p:80.26,  cls:'Emerging Markets',  er:0.25, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:14456.04, gd:2769.27, div:0.0343},
+  {t:'AMZN',  n:'Amazon.com Inc',                       sh:80,     p:209.41, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Individual', tax:'Taxable', cb:2349.59, gd:14752.06, div:null},
+  {t:'AIRR',  n:'First Trust RBA Industrial ETF',       sh:138.04, p:109.95, cls:'US Industrials',    er:0.70, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:13539.49, gd:1768.12, div:0.001},
+  {t:'DFIV',  n:'Dimensional Intl Value ETF',           sh:267.18, p:52.38,  cls:'Intl Value',        er:0.27, acct:'401K', acct:'Roth IRA', tax:'Non-Taxable', cb:9912.05, gd:4249.59, div:0.029},
+  {t:'VB',    n:'Vanguard Small-Cap ETF',               sh:46.56,  p:264.19, cls:'US Small Blend',    er:0.05, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:8938.27, gd:3435.34, div:0.0142},
+  {t:'INFL',  n:'Horizon Kinetics Inflation ETF',       sh:231.99, p:52.38,  cls:'Real Assets',       er:0.85, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:9843.8, gd:2408.52, div:0.0078},
+  {t:'XBI',   n:'SPDR S&P Biotech ETF',                 sh:95.44,  p:124.24, cls:'Biotech',           er:0.35, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:8417.08, gd:3463.54, div:0.0133},
   {t:'ALPS',  n:'ALPS CoreCommodity Strategy',          sh:1094.96,p:9.93,   cls:'Commodities',       er:1.02, acct:'IRA'},
   {t:'VTSMX', n:'Vanguard Total Stk Mkt Investor',      sh:67,     p:158.71, cls:'US Blend',          er:0.14, acct:'401K'},
-  {t:'RLY',   n:'SSGA Multi-Asset Real Return ETF',     sh:280,    p:35.97,  cls:'Real Assets',       er:0.50, acct:'Taxable'},
+  {t:'RLY',   n:'SSGA Multi-Asset Real Return ETF',     sh:280,    p:35.97,  cls:'Real Assets',       er:0.50, acct:'Taxable', acct:'Rollover IRA', tax:'Non-Taxable', cb:9964.86, gd:179.54, div:0.0745},
   {t:'VGSLX', n:'Vanguard REIT Index Admiral',          sh:76.29,  p:130.64, cls:'Real Estate',       er:0.12, acct:'IRA'},
   {t:'VIMAX', n:'Vanguard Mid-Cap Index Admiral',       sh:27.14,  p:357.79, cls:'US Mid Blend',      er:0.05, acct:'401K'},
   {t:'VEMAX', n:'Vanguard Emerging Markets Adm.',       sh:212.86, p:45.00,  cls:'Emerging Markets',  er:0.14, acct:'IRA'},
   {t:'VFWAX', n:'Vanguard All World ex-US Adm.',        sh:203.95, p:46.54,  cls:'Intl Developed',    er:0.10, acct:'401K'},
-  {t:'XAR',   n:'SPDR S&P Aerospace & Defense ETF',    sh:34,     p:268.50, cls:'Defense',           er:0.35, acct:'Taxable'},
-  {t:'PAVE',  n:'Global X Infrastructure Dev. ETF',    sh:147,    p:50.66,  cls:'US Industrials',    er:0.47, acct:'Taxable'},
-  {t:'VRT',   n:'Vertiv Holdings Co',                   sh:20.04,  p:267.38, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'SHLD',  n:'Global X Defense Tech ETF',            sh:60,     p:76.02,  cls:'Defense',           er:0.50, acct:'Taxable'},
-  {t:'GLTR',  n:'abrdn Physical Prec. Metals ETF',      sh:19,     p:233.74, cls:'Commodities',       er:0.60, acct:'Taxable'},
-  {t:'IREN',  n:'Iris Energy Ltd',                      sh:78,     p:44.33,  cls:'Crypto / Digital',  er:0,    acct:'Taxable'},
-  {t:'AGX',   n:'Argan Inc',                            sh:7.2,    p:473.19, cls:'US Industrials',    er:0,    acct:'Taxable'},
-  {t:'WMT',   n:'Walmart Inc',                          sh:26.38,  p:125.05, cls:'US Large Value',    er:0,    acct:'Taxable'},
-  {t:'VST',   n:'Vistra Corp',                          sh:18.12,  p:161.94, cls:'Energy / Power',    er:0,    acct:'Taxable'},
-  {t:'NBIS',  n:'Nebius Group',                         sh:23,     p:126.36, cls:'Biotech',           er:0,    acct:'Taxable'},
-  {t:'NRG',   n:'NRG Energy Inc',                       sh:18.27,  p:153.18, cls:'Energy / Power',    er:0,    acct:'Taxable'},
-  {t:'SPOT',  n:'Spotify Technology SA',                sh:5,      p:521.63, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'AMD',   n:'Advanced Micro Devices',               sh:13,     p:199.10, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'FCFS',  n:'FirstCash Holdings Inc',               sh:13,     p:192.92, cls:'Financials',        er:0,    acct:'Taxable'},
-  {t:'CEG',   n:'Constellation Energy Corp',            sh:8.05,   p:304.95, cls:'Energy / Power',    er:0,    acct:'Taxable'},
-  {t:'AVGO',  n:'Broadcom Inc',                         sh:7.15,   p:328.63, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'CRS',   n:'Carpenter Technology Corp',            sh:6.06,   p:373.38, cls:'US Industrials',    er:0,    acct:'Taxable'},
-  {t:'LHX',   n:'L3Harris Technologies',                sh:6.15,   p:365.86, cls:'Defense',           er:0,    acct:'Taxable'},
-  {t:'USFD',  n:'US Foods Holding Corp',                sh:24,     p:93.33,  cls:'Consumer Disc.',    er:0,    acct:'Taxable'},
-  {t:'SETM',  n:'Sprott Energy Transition Materials',   sh:63,     p:33.07,  cls:'Energy Transition', er:0.65, acct:'Taxable'},
-  {t:'PANW',  n:'Palo Alto Networks Inc',               sh:12,     p:167.29, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'ISRG',  n:'Intuitive Surgical Inc',               sh:4,      p:483.43, cls:'Biotech',           er:0,    acct:'Taxable'},
-  {t:'AVAV',  n:'AeroVironment Inc',                    sh:9,      p:207.50, cls:'Defense',           er:0,    acct:'Taxable'},
-  {t:'MSFT',  n:'Microsoft Corp',                       sh:4.33,   p:397.87, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'CRWD',  n:'CrowdStrike Holdings Inc',             sh:4,      p:429.53, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'GOOGL', n:'Alphabet Inc',                         sh:5.41,   p:303.93, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'CORZ',  n:'Core Scientific Inc',                  sh:95,     p:16.79,  cls:'Crypto / Digital',  er:0,    acct:'Taxable'},
-  {t:'PLTR',  n:'Palantir Technologies Inc',            sh:10,     p:152.02, cls:'US Large Growth',   er:0,    acct:'Taxable'},
-  {t:'KRKNF', n:'Kraken Robotics Inc',                  sh:220,    p:6.74,   cls:'Defense',           er:0,    acct:'Taxable'},
-  {t:'CCJ',   n:'Cameco Corp',                          sh:13,     p:109.42, cls:'Energy / Power',    er:0,    acct:'Taxable'},
-  {t:'ONDS',  n:'Ondas Inc',                            sh:135,    p:10.39,  cls:'Defense',           er:0,    acct:'Taxable'},
-  {t:'OKLO',  n:'Oklo Inc',                             sh:23,     p:58.33,  cls:'Energy / Power',    er:0,    acct:'Taxable'},
-  {t:'SOFI',  n:'SoFi Technologies Inc',                sh:56,     p:17.91,  cls:'Financials',        er:0,    acct:'Taxable'},
-  {t:'HTFL',  n:'Heartflow Inc',                        sh:37,     p:21.24,  cls:'Biotech',           er:0,    acct:'Taxable'},
-  {t:'Cash',  n:'Cash',                                 sh:18705,  p:1.00,   cls:'Cash',              er:0,    acct:'Taxable'},
+  {t:'XAR',   n:'SPDR S&P Aerospace & Defense ETF',    sh:34,     p:268.50, cls:'Defense',           er:0.35, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:9623.7, gd:-400.86, div:0.0017},
+  {t:'PAVE',  n:'Global X Infrastructure Dev. ETF',    sh:147,    p:50.66,  cls:'US Industrials',    er:0.47, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:7743.23, gd:-277.1, div:0.0079},
+  {t:'VRT',   n:'Vertiv Holdings Co',                   sh:20.04,  p:267.38, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1865.05, gd:3512.17, div:0.001},
+  {t:'SHLD',  n:'Global X Defense Tech ETF',            sh:60,     p:76.02,  cls:'Defense',           er:0.50, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:4467.3, gd:111.3, div:0.0063},
+  {t:'GLTR',  n:'abrdn Physical Prec. Metals ETF',      sh:19,     p:233.74, cls:'Commodities',       er:0.60, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:4706.02, gd:-235.89, div:null},
+  {t:'IREN',  n:'Iris Energy Ltd',                      sh:78,     p:44.33,  cls:'Crypto / Digital',  er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:625.09, gd:2774.71, div:null},
+  {t:'AGX',   n:'Argan Inc',                            sh:7.2,    p:473.19, cls:'US Industrials',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:805.56, gd:2568.26, div:0.0044},
+  {t:'WMT',   n:'Walmart Inc',                          sh:26.38,  p:125.05, cls:'US Large Value',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1873.03, gd:1447.35, div:0.0078},
+  {t:'VST',   n:'Vistra Corp',                          sh:18.12,  p:161.94, cls:'Energy / Power',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:2372.32, gd:600.02, div:0.0057},
+  {t:'NBIS',  n:'Nebius Group',                         sh:23,     p:126.36, cls:'Biotech',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1998.59, gd:651.82, div:null},
+  {t:'NRG',   n:'NRG Energy Inc',                       sh:18.27,  p:153.18, cls:'Energy / Power',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1770.35, gd:1043.22, div:0.0124},
+  {t:'SPOT',  n:'Spotify Technology SA',                sh:5,      p:521.63, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1513.43, gd:1142.62, div:null},
+  {t:'AMD',   n:'Advanced Micro Devices',               sh:13,     p:199.10, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1263.72, gd:1299.03, div:null},
+  {t:'FCFS',  n:'FirstCash Holdings Inc',               sh:13,     p:192.92, cls:'Financials',        er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:2577.95, gd:-78.96, div:0.0087},
+  {t:'CEG',   n:'Constellation Energy Corp',            sh:8.05,   p:304.95, cls:'Energy / Power',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:2134.97, gd:333.0, div:0.0057},
+  {t:'AVGO',  n:'Broadcom Inc',                         sh:7.15,   p:328.63, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1154.0, gd:1147.73, div:0.0081},
+  {t:'CRS',   n:'Carpenter Technology Corp',            sh:6.06,   p:373.38, cls:'US Industrials',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:751.76, gd:1519.84, div:0.0022},
+  {t:'LHX',   n:'L3Harris Technologies',                sh:6.15,   p:365.86, cls:'Defense',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1599.64, gd:640.96, div:0.0139},
+  {t:'USFD',  n:'US Foods Holding Corp',                sh:24,     p:93.33,  cls:'Consumer Disc.',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:2176.2, gd:52.08, div:null},
+  {t:'SETM',  n:'Sprott Energy Transition Materials',   sh:63,     p:33.07,  cls:'Energy Transition', er:0.65, acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:2292.07, gd:-161.41, div:0.0137},
+  {t:'PANW',  n:'Palo Alto Networks Inc',               sh:12,     p:167.29, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1023.34, gd:1019.3, div:null},
+  {t:'ISRG',  n:'Intuitive Surgical Inc',               sh:4,      p:483.43, cls:'Biotech',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1595.09, gd:360.69, div:null},
+  {t:'AVAV',  n:'AeroVironment Inc',                    sh:9,      p:207.50, cls:'Defense',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1642.95, gd:303.3, div:null},
+  {t:'MSFT',  n:'Microsoft Corp',                       sh:4.33,   p:397.87, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1337.99, gd:393.3, div:0.0092},
+  {t:'CRWD',  n:'CrowdStrike Holdings Inc',             sh:4,      p:429.53, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1177.14, gd:559.98, div:null},
+  {t:'GOOGL', n:'Alphabet Inc',                         sh:5.41,   p:303.93, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:511.65, gd:1150.35, div:0.0028},
+  {t:'CORZ',  n:'Core Scientific Inc',                  sh:95,     p:16.79,  cls:'Crypto / Digital',  er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1153.64, gd:427.98, div:null},
+  {t:'PLTR',  n:'Palantir Technologies Inc',            sh:10,     p:152.02, cls:'US Large Growth',   er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:278.95, gd:1265.6, div:null},
+  {t:'KRKNF', n:'Kraken Robotics Inc',                  sh:220,    p:6.74,   cls:'Defense',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1069.99, gd:526.77, div:null},
+  {t:'CCJ',   n:'Cameco Corp',                          sh:13,     p:109.42, cls:'Energy / Power',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1195.35, gd:280.62, div:0.0016},
+  {t:'ONDS',  n:'Ondas Inc',                            sh:135,    p:10.39,  cls:'Defense',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1399.28, gd:36.94, div:null},
+  {t:'OKLO',  n:'Oklo Inc',                             sh:23,     p:58.33,  cls:'Energy / Power',    er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:543.86, gd:871.29, div:null},
+  {t:'SOFI',  n:'SoFi Technologies Inc',                sh:56,     p:17.91,  cls:'Financials',        er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:886.76, gd:113.32, div:null},
+  {t:'HTFL',  n:'Heartflow Inc',                        sh:37,     p:21.24,  cls:'Biotech',           er:0,    acct:'Taxable', acct:'Roth IRA', tax:'Non-Taxable', cb:1278.91, gd:-455.84, div:null},
+  {t:'SNSXX', n:'Schwab Treasury Obligations MM',   sh:17749, p:1.00,  cls:'Cash',          er:0,    acct:'Individual',    tax:'Taxable',     cb:17749.65, gd:0,       div:null},
+  {t:'Cash',  n:'Cash',                                 sh:18705,  p:1.00,   cls:'Cash',              er:0,    acct:'Taxable', acct:'Individual', tax:'Taxable', cb:18705.08, gd:0, div:null},
 ];
 
 // Classification → brand color
@@ -507,29 +558,30 @@ const fv  = (n,d=0)=> n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+(n/1e3).toFix
 const fpct= n=>(n>=0?'+':'')+n.toFixed(2)+'%';
 
 // ════════════════════════════════════════════════════════════
-// LIVE PRICES
+// LIVE PRICES — multi-proxy fallback for reliability
 // ════════════════════════════════════════════════════════════
 async function fetchPrices(){
   document.getElementById('live-dot').className='live-dot';
   document.getElementById('price-ts').textContent='Fetching…';
-  const syms=H.filter(h=>h.t!=='Cash').map(h=>h.t).join('%2C');
-  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
-  try{
-    const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url));
-    const d=await r.json();
-    (d?.quoteResponse?.result||[]).forEach(q=>{
-      LP[q.symbol]=q.regularMarketPrice;
-      const h=H.find(x=>x.t===q.symbol);
-      if(h){h._chg=q.regularMarketChange;h._pct=q.regularMarketChangePercent;}
-    });
-    const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('live-dot').className='live-dot live';
-    document.getElementById('price-ts').textContent='Live · '+ts;
-    document.getElementById('footer-ts').textContent=new Date().toLocaleString();
-  }catch(e){
-    document.getElementById('price-ts').textContent='Cached prices';
-    document.getElementById('footer-ts').textContent='Cached — '+new Date().toLocaleString();
+  const syms=H.filter(h=>!['Cash','SNSXX'].includes(h.t)).map(h=>h.t).join(',');
+  const yUrl=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent`;
+  const proxies=[`https://corsproxy.io/?${encodeURIComponent(yUrl)}`,`https://api.allorigins.win/raw?url=${encodeURIComponent(yUrl)}`];
+  let loaded=false;
+  for(const proxy of proxies){
+    try{
+      const ctrl=new AbortController(),tid=setTimeout(()=>ctrl.abort(),8000);
+      const r=await fetch(proxy,{signal:ctrl.signal});clearTimeout(tid);
+      if(!r.ok)continue;
+      const d=await r.json();
+      const res=d?.quoteResponse?.result||[];if(!res.length)continue;
+      res.forEach(q=>{LP[q.symbol]=q.regularMarketPrice;const h=H.find(x=>x.t===q.symbol);if(h){h._chg=q.regularMarketChange;h._pct=q.regularMarketChangePercent;}});
+      loaded=true;break;
+    }catch(e){continue;}
   }
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('live-dot').className='live-dot'+(loaded?' live':'');
+  document.getElementById('price-ts').textContent=(loaded?'Live':'Cached')+' · '+ts;
+  document.getElementById('footer-ts').textContent=new Date().toLocaleString();
   renderAll();
 }
 
@@ -543,6 +595,7 @@ function go(id,el){
   if(el) el.classList.add('active');
   if(id==='allocation'){renderAlloc();drawStyleBox();}
   if(id==='montecarlo') runMC();
+  if(id==='performance') renderPerf();
   if(id==='optimizer'){renderERTable();renderERCharts();}
   if(id==='whatif') renderWIChart();
 }
@@ -550,9 +603,119 @@ function go(id,el){
 // ════════════════════════════════════════════════════════════
 // RENDER ALL
 // ════════════════════════════════════════════════════════════
+
+// ═══ PERFORMANCE ═══
+let pKey='gainpct', pDir=-1;
+const fgain = n => (n>=0?'+':'-')+'$'+(Math.abs(n)>=1000?(Math.abs(n)/1000).toFixed(1)+'K':Math.abs(n).toFixed(0));
+const AC2 = {'Roth IRA':'#1fb8a0','Individual':'#f59e0b','Rollover IRA':'#4a9eff','Individual/Roth IRA':'#9b6bff'};
+
+function renderPerfByClass(){
+  const groups={};
+  H.forEach(h=>{if(!groups[h.cls])groups[h.cls]=[];groups[h.cls].push(h);});
+  const tv=TV();
+  const clsData=Object.entries(groups).map(([cls,holdings])=>{
+    const totalVal=holdings.reduce((s,h)=>s+lv(h),0);
+    const totalCB=holdings.reduce((s,h)=>s+(h.cb||0),0);
+    const totalGain=holdings.reduce((s,h)=>s+(h.gd||0),0);
+    const gainPct=totalCB>0?(totalGain/totalCB)*100:0;
+    const dayPnl=holdings.reduce((s,h)=>s+(h._chg||0)*h.sh,0);
+    return{cls,holdings,totalVal,totalCB,totalGain,gainPct,dayPnl};
+  }).sort((a,b)=>b.totalVal-a.totalVal);
+  document.getElementById('perf-by-class').innerHTML=clsData.map((g,i)=>{
+    const col=CC[g.cls]||'#6080a0';
+    const gainCol=g.totalGain>=0?'var(--teal)':'var(--red)';
+    const wt=(g.totalVal/tv*100).toFixed(1);
+    const holdingRows=g.holdings.slice().sort((a,b)=>lv(b)-lv(a)).map(h=>{
+      const v=lv(h);
+      const gp=h.cb>0?(h.gd||0)/h.cb*100:0;
+      const gc=(h.gd||0)>=0?'var(--teal)':'var(--red)';
+      const dc=(h._pct||0)>=0?'var(--teal)':'var(--red)';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border)">
+        <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:${col};width:52px;flex-shrink:0">${h.t}</span>
+        <span style="font-size:11px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.n.slice(0,24)}</span>
+        <span style="font-size:10px;color:${AC2[h.acct]||'#888'};width:80px;text-align:right;flex-shrink:0">${h.acct}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);width:58px;text-align:right;flex-shrink:0">${fv(v,1)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);width:52px;text-align:right;flex-shrink:0">$${(h.cb||0).toFixed(0)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${gc};width:60px;text-align:right;flex-shrink:0">${fgain(h.gd||0)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${gc};width:50px;text-align:right;flex-shrink:0">${h.cb>0?fpct(gp):'—'}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${dc};width:50px;text-align:right;flex-shrink:0">${h._pct!=null?fpct(h._pct||0):'—'}</span>
+      </div>`;
+    }).join('');
+    return `<div class="cls-card">
+      <div class="cls-header" onclick="toggleCls('cls-${i}',this)">
+        <span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span>
+        <span style="font-size:12px;font-weight:600;color:var(--text);flex:1">${g.cls}</span>
+        <span style="font-size:11px;color:var(--text3);margin-right:12px">${g.holdings.length} holdings · ${wt}% AUM</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:${gainCol};margin-right:12px">${fgain(g.totalGain)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:${gainCol};margin-right:8px">${g.gainPct>=0?'+':''}${g.gainPct.toFixed(1)}%</span>
+        <span class="cls-expand">▼</span>
+      </div>
+      <div class="cls-body" id="cls-${i}">
+        <div style="display:flex;gap:8px;padding:5px 14px;background:var(--bg4);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em">
+          <span style="width:52px">Ticker</span><span style="flex:1">Name</span>
+          <span style="width:80px;text-align:right">Account</span>
+          <span style="width:58px;text-align:right">Value</span>
+          <span style="width:52px;text-align:right">Cost</span>
+          <span style="width:60px;text-align:right">Gain $</span>
+          <span style="width:50px;text-align:right">Gain %</span>
+          <span style="width:50px;text-align:right">Day %</span>
+        </div>
+        ${holdingRows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCls(id,hdr){
+  const body=document.getElementById(id);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  hdr.classList.toggle('open',!open);
+}
+
+function renderPerfTable(){
+  updateSortArrows('ps',pKey,pDir);
+  const sorted=H.slice().sort((a,b)=>{
+    if(pKey==='t')return pDir*(a.t>b.t?1:-1);
+    if(pKey==='acct')return pDir*(a.acct>b.acct?1:-1);
+    let av,bv;
+    if(pKey==='cb'){av=a.cb||0;bv=b.cb||0;}
+    else if(pKey==='val'){av=lv(a);bv=lv(b);}
+    else if(pKey==='gaind'){av=a.gd||0;bv=b.gd||0;}
+    else if(pKey==='gainpct'){av=a.cb>0?(a.gd||0)/a.cb*100:0;bv=b.cb>0?(b.gd||0)/b.cb*100:0;}
+    else if(pKey==='daypct'){av=a._pct||0;bv=b._pct||0;}
+    else{av=lv(a);bv=lv(b);}
+    return pDir*(av-bv);
+  });
+  document.getElementById('perf-body').innerHTML=sorted.map(h=>{
+    const v=lv(h);
+    const gainPct=h.cb>0?(h.gd||0)/h.cb*100:0;
+    const gainCol=(h.gd||0)>=0?'var(--teal)':'var(--red)';
+    const dayCol=(h._pct||0)>=0?'var(--teal)':'var(--red)';
+    const col=CC[h.cls]||'#6080a0';
+    const acCol=AC2[h.acct]||'#888';
+    return `<tr>
+      <td><b style="font-family:'DM Mono',monospace;color:${col}">${h.t}</b></td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:3px;background:${acCol}18;color:${acCol}">${h.acct}</span></td>
+      <td class="r mono">$${(h.cb||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
+      <td class="r mono">${fv(v,1)}</td>
+      <td class="r mono" style="color:${gainCol}">${fgain(h.gd||0)}</td>
+      <td class="r mono" style="color:${gainCol}">${h.cb>0?fpct(gainPct):'—'}</td>
+      <td class="r mono" style="color:${dayCol}">${h._pct!=null?fpct(h._pct||0):'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function sortPerf(k){
+  if(pKey===k)pDir*=-1;else{pKey=k;pDir=-1;}
+  renderPerfTable();
+}
+
+function renderPerf(){renderPerfByClass();renderPerfTable();}
+
 function renderAll(){
   updateMetrics();renderTop15();renderSectorChart();
-  renderHoldings();renderScorecard();renderRadar();
+  renderHoldings();renderScorecard();
   renderMovers();renderWISliders();renderInsights();renderConc();
 }
 
@@ -652,7 +815,7 @@ function renderScorecard(){
 // ════════════════════════════════════════════════════════════
 // FACTOR RADAR
 // ════════════════════════════════════════════════════════════
-function renderRadar(){
+function{
   const cv=document.getElementById('radar');if(!cv)return;
   const ctx=cv.getContext('2d');
   const factors=['Market Beta','Value','Size','Momentum','Profitability','Investment'];
@@ -707,27 +870,53 @@ function renderMovers(){
 // ════════════════════════════════════════════════════════════
 // HOLDINGS TABLE
 // ════════════════════════════════════════════════════════════
+
+function updateSortArrows(prefix, key, dir){
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(el=>el.textContent='');
+  const el=document.getElementById(prefix+'-'+key);
+  if(el)el.textContent=dir===1?'↑':'↓';
+}
+
 function sortBy(k){sKey===k?sDir*=-1:(sKey=k,sDir=-1);renderHoldings();}
+function sortH(k){sortBy(k);}
 function renderHoldings(){
+  updateSortArrows("hs",sKey,sDir);
   const tv=TV(),maxV=Math.max(...H.map(h=>lv(h)));
   const sorted=H.slice().sort((a,b)=>{
     if(sKey==='t') return sDir*(a.t>b.t?1:-1);
-    const av=sKey==='sh'?a.sh:sKey==='price'?lp(a):sKey==='wt'?lv(a)/tv:sKey==='pct'?a._pct||0:lv(a);
-    const bv=sKey==='sh'?b.sh:sKey==='price'?lp(b):sKey==='wt'?lv(b)/tv:sKey==='pct'?b._pct||0:lv(b);
+    if(sKey==='cls') return sDir*(a.cls>b.cls?1:-1);
+    if(sKey==='acct') return sDir*((a.acct||'')>(b.acct||'')?1:-1);
+    if(sKey==='tax') return sDir*((a.tax||'')>(b.tax||'')?1:-1);
+    let av,bv;
+    if(sKey==='price'){av=lp(a);bv=lp(b);}
+    else if(sKey==='val'){av=lv(a);bv=lv(b);}
+    else if(sKey==='wt'){av=lv(a)/tv;bv=lv(b)/tv;}
+    else if(sKey==='cb'){av=a.cb||0;bv=b.cb||0;}
+    else if(sKey==='gainpct'){av=a.cb>0?(a.gd||0)/a.cb*100:0;bv=b.cb>0?(b.gd||0)/b.cb*100:0;}
+    else if(sKey==='pct'){av=a._pct||0;bv=b._pct||0;}
+    else{av=lv(a);bv=lv(b);}
     return sDir*(av-bv);
   });
   document.getElementById('h-body').innerHTML=sorted.map(h=>{
     const v=lv(h),w=v/tv*100,pr=lp(h),pct=h._pct||0,col=CC[h.cls]||'#6080a0';
+    const gainPct=h.cb>0?(h.gd||0)/h.cb*100:0;
+    const gainCol=(h.gd||0)>=0?'var(--teal)':'var(--red)';
+    const taxBg=h.tax==='Non-Taxable'?'rgba(31,184,160,0.1)':'rgba(245,158,11,0.1)';
+    const taxC=h.tax==='Non-Taxable'?'var(--teal)':'var(--amber)';
+    const acCol=(AC2[h.acct]||'#888');
     return `<tr>
       <td><b style="font-family:'DM Mono',monospace;color:${col}">${h.t}</b></td>
       <td><span class="tag" style="background:${col}18;color:${col}">${h.cls}</span></td>
-      <td class="r mono">${h.sh.toLocaleString()}</td>
+      <td><span class="tag" style="background:${acCol}18;color:${acCol}">${h.acct}</span></td>
+      <td><span class="tag" style="background:${taxBg};color:${taxC}">${h.tax||'—'}</span></td>
       <td class="r mono">$${pr.toFixed(2)}</td>
       <td class="r mono">${fv(v,1)}</td>
       <td class="r mono">${w.toFixed(2)}%</td>
+      <td class="r mono">$${(h.cb||0).toLocaleString('en',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
+      <td class="r mono" style="color:${gainCol}">${h.cb>0?fpct(gainPct):'—'}</td>
       <td class="r mono ${h._pct!=null?(pct>=0?'pos':'neg'):''}">${h._pct!=null?fpct(pct):'—'}</td>
       <td class="r mono" style="color:${h.er>0.5?'var(--red)':h.er>0.2?'var(--amber)':'var(--text3)'}">${h.er>0?h.er.toFixed(2)+'%':'—'}</td>
-      <td><div class="bar-track" style="width:80px"><div class="bar-fill" style="width:${v/maxV*100}%;background:${col}70"></div></div></td>
+      <td><div class="bar-track" style="width:70px"><div class="bar-fill" style="width:${v/maxV*100}%;background:${col}70"></div></div></td>
     </tr>`;
   }).join('');
 }
@@ -753,14 +942,12 @@ function renderAlloc(){
   const tv=TV(),accts={};
   H.forEach(h=>{accts[h.acct]=(accts[h.acct]||0)+lv(h);});
   const ac2={Taxable:'#1fb8a0','401K':'#4a9eff',IRA:'#9b6bff',HSA:'#f59e0b'};
-  document.getElementById('acct-bars').innerHTML=Object.entries(accts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
-    const p=v/tv*100,col=ac2[k]||'#555e7a';
-    return `<div class="alloc-row" style="margin-bottom:10px">
-      <span class="alloc-lbl" style="font-weight:500;width:80px">${k}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${col}60;border-right:2px solid ${col}"></div></div>
-      <span style="font-size:11px;font-family:'DM Mono',monospace;color:${col};width:96px;text-align:right;flex-shrink:0">${fv(v,0)} · ${p.toFixed(0)}%</span>
-    </div>`;
-  }).join('');
+  const ACCT_REAL=[['Roth IRA',254619,'#1fb8a0'],['Individual',74734,'#f59e0b'],['Rollover IRA',52039,'#4a9eff']];
+  const ACCT_TOT=ACCT_REAL.reduce((s,a)=>s+a[1],0);
+  document.getElementById('acct-bars').innerHTML=ACCT_REAL.map(([k,v,col])=>{
+    const p=v/ACCT_TOT*100;
+    return `<div class="alloc-row" style="margin-bottom:12px"><span class="alloc-lbl" style="font-weight:500">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${col}60;border-right:2px solid ${col}"></div></div><span style="font-size:11px;font-family:'DM Mono',monospace;color:${col};width:110px;text-align:right;flex-shrink:0">$${(v/1000).toFixed(0)}K · ${p.toFixed(1)}%</span></div>`;
+  }).join('')+`<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);font-size:11px;color:var(--text3)"><b style="color:var(--teal)">82.2% Non-Taxable</b> (Roth + Rollover IRA) &nbsp;·&nbsp; <b style="color:var(--amber)">17.8% Taxable</b> (Individual)</div>`;
   renderCorrMap();
 }
 
@@ -910,17 +1097,17 @@ function runMC(){
 // ════════════════════════════════════════════════════════════
 const ER=[
   {t:'ALPS', n:'CoreCommodity Strategy',       er:1.02,alt:'PDBC',aER:.59,val:10873,note:'Similar commodity futures, cheaper'},
-  {t:'AIRR', n:'First Trust Industrial ETF',   er:.70, alt:'PAVE',aER:.47,val:15177,note:'Same theme, lower cost'},
-  {t:'INFL', n:'Horizon Kinetics Inflation',   er:.85, alt:'RINF',aER:.30,val:12152,note:'TIPS-based inflation hedge'},
-  {t:'SETM', n:'Sprott Energy Transition',     er:.65, alt:'LIT', aER:.75,val:2083, note:'Slight premium, more liquid'},
-  {t:'GLTR', n:'abrdn Physical Prec. Metals',  er:.60, alt:'IAU', aER:.25,val:4441, note:'Gold-only, much cheaper'},
-  {t:'RLY',  n:'SSGA Multi-Asset Real Return', er:.50, alt:'STIP',aER:.03,val:10073,note:'Short TIPS — simpler'},
-  {t:'SHLD', n:'Global X Defense Tech ETF',    er:.50, alt:'ITA', aER:.42,val:4561, note:'iShares aero & defense'},
-  {t:'XBI',  n:'SPDR S&P Biotech ETF',         er:.35, alt:null,  aER:.35,val:11858,note:'Best-in-class — keep'},
-  {t:'XAR',  n:'SPDR S&P Aero & Defense',     er:.35, alt:null,  aER:.35,val:9129, note:'Similar to ITA — keep XAR'},
-  {t:'EMXC', n:'iShares MSCI EM ex China',     er:.25, alt:null,  aER:.25,val:16967,note:'Already competitive — keep'},
-  {t:'DFIV', n:'Dimensional Intl Value ETF',   er:.27, alt:null,  aER:.27,val:13996,note:'Factor premium justifies fee'},
-  {t:'AVUV', n:'Avantis US Sm Cap Value',      er:.25, alt:null,  aER:.25,val:18047,note:'Best-in-class — keep'},
+  {t:'AIRR', n:'First Trust Industrial ETF',   er:.70, alt:'PAVE',aER:.47,val:15177,note:'Same theme, lower cost', acct:'Roth IRA', tax:'Non-Taxable', cb:13539.49, gd:1768.12, div:0.001},
+  {t:'INFL', n:'Horizon Kinetics Inflation',   er:.85, alt:'RINF',aER:.30,val:12152,note:'TIPS-based inflation hedge', acct:'Roth IRA', tax:'Non-Taxable', cb:9843.8, gd:2408.52, div:0.0078},
+  {t:'SETM', n:'Sprott Energy Transition',     er:.65, alt:'LIT', aER:.75,val:2083, note:'Slight premium, more liquid', acct:'Roth IRA', tax:'Non-Taxable', cb:2292.07, gd:-161.41, div:0.0137},
+  {t:'GLTR', n:'abrdn Physical Prec. Metals',  er:.60, alt:'IAU', aER:.25,val:4441, note:'Gold-only, much cheaper', acct:'Roth IRA', tax:'Non-Taxable', cb:4706.02, gd:-235.89, div:null},
+  {t:'RLY',  n:'SSGA Multi-Asset Real Return', er:.50, alt:'STIP',aER:.03,val:10073,note:'Short TIPS — simpler', acct:'Rollover IRA', tax:'Non-Taxable', cb:9964.86, gd:179.54, div:0.0745},
+  {t:'SHLD', n:'Global X Defense Tech ETF',    er:.50, alt:'ITA', aER:.42,val:4561, note:'iShares aero & defense', acct:'Roth IRA', tax:'Non-Taxable', cb:4467.3, gd:111.3, div:0.0063},
+  {t:'XBI',  n:'SPDR S&P Biotech ETF',         er:.35, alt:null,  aER:.35,val:11858,note:'Best-in-class — keep', acct:'Roth IRA', tax:'Non-Taxable', cb:8417.08, gd:3463.54, div:0.0133},
+  {t:'XAR',  n:'SPDR S&P Aero & Defense',     er:.35, alt:null,  aER:.35,val:9129, note:'Similar to ITA — keep XAR', acct:'Roth IRA', tax:'Non-Taxable', cb:9623.7, gd:-400.86, div:0.0017},
+  {t:'EMXC', n:'iShares MSCI EM ex China',     er:.25, alt:null,  aER:.25,val:16967,note:'Already competitive — keep', acct:'Roth IRA', tax:'Non-Taxable', cb:14456.04, gd:2769.27, div:0.0343},
+  {t:'DFIV', n:'Dimensional Intl Value ETF',   er:.27, alt:null,  aER:.27,val:13996,note:'Factor premium justifies fee', acct:'Roth IRA', tax:'Non-Taxable', cb:9912.05, gd:4249.59, div:0.029},
+  {t:'AVUV', n:'Avantis US Sm Cap Value',      er:.25, alt:null,  aER:.25,val:18047,note:'Best-in-class — keep', acct:'Roth IRA', tax:'Non-Taxable', cb:12790.22, gd:5362.16, div:0.0105},
   {t:'VEIRX',n:'Vanguard Equity Income Adm.',  er:.18, alt:null,  aER:.18,val:24599,note:'Very competitive — keep'},
   {t:'VTSMX',n:'Vanguard Total Stk Investor',  er:.14, alt:'VTI', aER:.03,val:10634,note:'Upgrade to ETF, free alpha'},
   {t:'VFWAX',n:'Vanguard All World ex-US Adm.',er:.10, alt:null,  aER:.10,val:9492, note:'Competitive — keep'},
@@ -972,7 +1159,7 @@ function renderInsights(){
     {l:'Factor exposure',s:84,d:'Strong value+profitability via AVUV/DFIV. Well-constructed.'},
     {l:'Liquidity profile',s:90,d:'~95%+ highly liquid ETFs and large-cap names.'},
     {l:'Growth-defense balance',s:78,d:'Defense satellite adds ballast to high-beta core.'},
-    {l:'Tax efficiency',s:65,d:'High taxable allocation. Consider shifting bonds/REIT to IRA.'},
+    {l:'Tax efficiency',s:82,d:'82% Non-Taxable (Roth + Rollover IRA) is excellent. Very tax-efficient structure.'},
   ].map(it=>`<div style="margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;margin-bottom:3px">
       <span style="font-size:11px;color:var(--text2)">${it.l}</span>
