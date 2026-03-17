@@ -152,8 +152,8 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
   <div class="metrics">
     <div class="m"><div class="m-lbl">Total Value</div><div class="m-val" id="ov-total">&mdash;</div><div class="m-chg" id="ov-chg">&mdash;</div></div>
     <div class="m"><div class="m-lbl">Day P&amp;L</div><div class="m-val" id="ov-pnl">&mdash;</div><div class="m-sub">vs prior close</div></div>
-    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">per Fidelity</div></div>
-    <div class="m"><div class="m-lbl">Unrealized Gain</div><div class="m-val pos">+$152K</div><div class="m-sub">+56.7% on cost</div></div>
+    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Fidelity accts only</div></div>
+    <div class="m"><div class="m-lbl">Unrealized Gain</div><div class="m-val pos">+$152K</div><div class="m-sub">Fidelity accts only</div></div>
     <div class="m"><div class="m-lbl">Blended ER</div><div class="m-val">0.16%</div><div class="m-sub">$846/yr drag</div></div>
   </div>
   <div class="g75">
@@ -195,7 +195,7 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 <div class="page" id="page-performance">
   <div class="metrics">
     <div class="m"><div class="m-lbl">Market Value</div><div class="m-val" id="pf-val">&mdash;</div><div class="m-sub">live prices</div></div>
-    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">per Fidelity</div></div>
+    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Fidelity accts only</div></div>
     <div class="m"><div class="m-lbl">Unrealized Gain $</div><div class="m-val pos">+$152K</div><div class="m-sub">all accounts</div></div>
     <div class="m"><div class="m-lbl">Unrealized Gain %</div><div class="m-val pos">+56.7%</div><div class="m-sub">total return on cost</div></div>
     <div class="m"><div class="m-lbl">Day P&amp;L</div><div class="m-val" id="pf-pnl">&mdash;</div><div class="m-sub">vs prior close</div></div>
@@ -229,10 +229,10 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 <div class="page" id="page-holdings">
   <div class="metrics">
     <div class="m"><div class="m-lbl">Total Value</div><div class="m-val" id="h-total">&mdash;</div><div class="m-sub">all positions</div></div>
-    <div class="m"><div class="m-lbl">Non-Taxable</div><div class="m-val">82.2%</div><div class="m-sub">Roth + Rollover IRA</div></div>
+    <div class="m"><div class="m-lbl">Non-Taxable</div><div class="m-val">86.0%</div><div class="m-sub">Roth + 401K + Rollover + HSA</div></div>
     <div class="m"><div class="m-lbl">Taxable</div><div class="m-val">17.8%</div><div class="m-sub">Individual accts</div></div>
     <div class="m"><div class="m-lbl">ETF weight</div><div class="m-val">~73%</div><div class="m-sub">26 funds</div></div>
-    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">56</div><div class="m-sub">per Fidelity</div></div>
+    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">65</div><div class="m-sub">Fidelity + 401K + HSA</div></div>
   </div>
   <div class="card">
     <div class="chd">All holdings <span class="sub">click any column header to sort &uarr;&darr;</span></div>
@@ -413,6 +413,18 @@ const H=[
   {t:'OKLO', n:'Oklo Inc',                        sh:23,    p:58.33, cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:543.86,  gd:871.29},
   {t:'SOFI', n:'SoFi Technologies Inc',           sh:56,    p:17.91, cls:'Financials',      er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:886.76,  gd:113.32},
   {t:'HTFL', n:'Heartflow Inc',                   sh:37,    p:21.24, cls:'Biotech',         er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1278.91, gd:-455.84},
+  // 401K & HSA holdings (no cost basis available)
+  {t:'VFIAX', n:'Vanguard 500 Index Admiral', sh:40.5572, p:613.72, cls:'US Blend', er:0.04, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VFWAX', n:'Vanguard FTSE All-World ex-US Adm.', sh:207.8043, p:46.54, cls:'Intl Developed', er:0.1, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VEMAX', n:'Vanguard Emerging Markets Adm.', sh:216.4067, p:45.0, cls:'Emerging Markets', er:0.14, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VEIRX', n:'Vanguard Equity-Income Adm.', sh:265.5533, p:94.16, cls:'US Large Value', er:0.18, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VIMAX', n:'Vanguard Mid-Cap Index Adm.', sh:27.4146, p:357.79, cls:'US Mid Blend', er:0.05, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VGSLX', n:'Vanguard REIT Index Adm.', sh:76.9138, p:130.64, cls:'Real Estate', er:0.12, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VTTSX', n:'Vanguard Target Retirement 2060', sh:1.0, p:1226.9, cls:'US Blend', er:0.15, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'ALPS', n:'CoreCommodity Strategy (401K)', sh:1.0, p:10785.38, cls:'Commodities', er:1.02, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VTSMX', n:'Vanguard Total Stock Mkt Investor', sh:67.6839, p:158.71, cls:'US Blend', er:0.14, acct:'HSA', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VTI', n:'Vanguard Total Stock Market ETF', sh:4.0052, p:330.0, cls:'US Blend', er:0.03, acct:'HSA', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'Cash', n:'Cash (HSA)', sh:1.0, p:159.4, cls:'Cash', er:0.0, acct:'HSA', tax:'Non-Taxable', cb:0, gd:0},
 ];
 
 // Color maps
@@ -423,7 +435,7 @@ const CC={'US Blend':'#2980b9','US Large Growth':'#1fb8a0','US Large Value':'#3a
   'Commodities':'#7a4a10','Biotech':'#c4537e','Energy/Power':'#e07020',
   'Crypto/Digital':'#9b6bff','Cash':'#555e7a','Real Estate':'#0f6e56',
   'Energy Transition':'#3b8d11','Financials':'#993c1d','Consumer Disc.':'#6a7080'};
-const AC2={'Roth IRA':'#1fb8a0','Individual':'#f59e0b','Rollover IRA':'#4a9eff','Indiv/Roth':'#9b6bff'};
+const AC2={'Roth IRA':'#1fb8a0','Individual':'#f59e0b','Rollover IRA':'#4a9eff','Indiv/Roth':'#9b6bff','401K':'#9b6bff','HSA':'#22c55e'};
 
 // State
 let LP={};
@@ -466,7 +478,7 @@ async function fetchPrices(){
   document.getElementById('ldot').className='ldot';
   document.getElementById('pts').textContent='Fetching\u2026';
 
-  const tickers=H.filter(h=>!['SNSXX','Cash'].includes(h.t)).map(h=>h.t);
+  const tickers=H.filter(h=>!['SNSXX','Cash','VTTSX'].includes(h.t)).map(h=>h.t);
 
   const results=await Promise.allSettled(
     tickers.map(sym=>
@@ -609,7 +621,7 @@ function renderScorecard(){
 // MOVERS
 // ============================================================
 function renderMovers(){
-  const wd=H.filter(h=>h._pct!=null&&!['SNSXX','Cash'].includes(h.t));
+  const wd=H.filter(h=>h._pct!=null&&!['SNSXX','Cash','VTTSX'].includes(h.t));
   const el=document.getElementById('movers');
   if(!wd.length){el.innerHTML='<div style="font-size:11px;color:var(--text3)">Awaiting live prices&hellip;</div>';return;}
   el.innerHTML=wd.slice().sort((a,b)=>Math.abs(b._pct)-Math.abs(a._pct)).slice(0,8).map(h=>{
@@ -806,7 +818,7 @@ function renderAlloc(){
     <div class="ar"><span class="al">${n}</span>
     <div class="bt"><div class="bf" style="width:${p}%;background:${c}80;border-right:2px solid ${c}"></div></div>
     <span class="ap" style="color:${c}">${p}%</span></div>`).join('');
-  const AT=[['Roth IRA',254619,'#1fb8a0'],['Individual',74734,'#f59e0b'],['Rollover IRA',52039,'#4a9eff']];
+  const AT=[['Roth IRA',254619,'#1fb8a0'],['401K',101174,'#9b6bff'],['Individual',74734,'#f59e0b'],['Rollover IRA',52039,'#4a9eff'],['HSA',12223,'#22c55e']];
   const tot=AT.reduce((s,a)=>s+a[1],0);
   document.getElementById('acct-bars').innerHTML=AT.map(([k,v,col])=>{
     const p=v/tot*100;
@@ -815,7 +827,7 @@ function renderAlloc(){
       <div class="bt"><div class="bf" style="width:${p}%;background:${col}60;border-right:2px solid ${col}"></div></div>
       <span style="font-size:11px;font-family:'DM Mono',monospace;color:${col};width:110px;text-align:right;flex-shrink:0">$${(v/1000).toFixed(0)}K &middot; ${p.toFixed(1)}%</span>
     </div>`;
-  }).join('')+'<div style="margin-top:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-sm);font-size:11px;color:var(--text3)"><b style="color:var(--teal)">82.2% Non-Taxable</b> (Roth + Rollover IRA) &nbsp;&middot;&nbsp; <b style="color:var(--amber)">17.8% Taxable</b></div>';
+  }).join('')+'<div style="margin-top:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-sm);font-size:11px;color:var(--text3)"><b style="color:var(--teal)">86.0% Non-Taxable</b> (Roth IRA + 401K + Rollover IRA + HSA) &nbsp;&middot;&nbsp; <b style="color:var(--amber)">14.0% Taxable</b> (Individual)</div>';
   renderCorrMap();
 }
 
