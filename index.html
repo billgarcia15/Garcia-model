@@ -1416,7 +1416,7 @@ CLASSIFICATION BREAKDOWN: ${clsSummary}
 
 NOTABLE LOSERS (tax-loss candidates): ${losers}
 
-INVESTMENT MANDATE: Aggressive growth with bear market protection. Age 35, long horizon. Already has strong exposure to: defense/aerospace, nuclear power, AI/semiconductors, industrial renaissance, biotech. Wants heavy growth opportunities but also hedges if bear market comes.
+INVESTMENT MANDATE: Aggressive growth with bear market protection. Age 35, long horizon. IMPORTANT: You have 40+ years of portfolio management experience. You do NOT pad recommendations to fill a list. If you only see 3 genuinely compelling ideas right now, present 3 with full conviction and explain why the bar is high. If a sector looks fully valued or risky, say so directly. Intellectual honesty is more valuable than a long list. Already has strong exposure to: defense/aerospace, nuclear power, AI/semiconductors, industrial renaissance, biotech. Wants heavy growth opportunities but also hedges if bear market comes.
 
 GAPS I've identified that need your validation or rejection:
 - Healthcare is 9% vs 12% benchmark (underweight)
@@ -1428,7 +1428,7 @@ Please provide:
 
 1. **MACRO OUTLOOK** (3-4 sentences): Your honest current macro view — where are we in the cycle, what are the top 3 risks, what tailwinds matter for this portfolio
 
-2. **TOP BUY OPPORTUNITIES** (5-7 ideas): For each provide:
+2. **TOP BUY OPPORTUNITIES** (up to 10 ideas, but ONLY include ideas you genuinely believe in — quality over quantity always): If the market looks expensive, crowded, or a sector has poor risk/reward right now, say so explicitly and list fewer ideas. A shorter list with high conviction is far more valuable than 10 mediocre ones. For each idea you DO include, provide:
    - Why it fits THIS specific portfolio (mention actual holdings it complements or gaps it fills)
    - Business model & competitive moat in 2 sentences
    - Key risk to be aware of
@@ -1461,7 +1461,9 @@ For section headers use:
 
 For the macro outlook use a plain styled div with font-size:12px, color:#8b91a8, line-height:1.7, padding:14px, background:#1a2035, border-radius:8px, margin-bottom:16px.
 
-Be brutally honest and genuinely useful. This person works in wealth management and will see through generic advice.`;
+Be brutally honest and genuinely useful. This person works in wealth management and will see through generic advice.
+
+If your buy list is shorter than 10, open that section with a brief honest explanation of WHY — e.g. "Given current valuations in X and the macro backdrop of Y, I'm only comfortable recommending Z ideas at this time. Here's why the bar is high right now:" — then list only what you truly believe in. This context is just as valuable as the recommendations themselves.`;
 
     out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px">
       <div style="font-size:12px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px">
@@ -1482,7 +1484,7 @@ Be brutally honest and genuinely useful. This person works in wealth management 
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 4000,
+          max_tokens: 6000,
           stream: true,
           system: systemPrompt,
           messages: [{ role: 'user', content: userPrompt }]
