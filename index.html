@@ -29,6 +29,7 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 .ldot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s}
 .ldot.live{background:var(--teal);box-shadow:0 0 6px var(--teal);animation:pulse 2.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .pts{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);white-space:nowrap}
 .btn{font-size:11px;padding:5px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);cursor:pointer;transition:all .15s}
 .btn:hover{color:var(--text);border-color:var(--border3)}
@@ -114,6 +115,25 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+.opp-loading{text-align:center;padding:60px 20px;color:var(--text3)}
+.opp-spinner{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.opp-section{margin-bottom:20px}
+.opp-rec{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;border-left:3px solid var(--teal)}
+.opp-rec.bear{border-left-color:var(--amber)}
+.opp-rec.risk{border-left-color:var(--red)}
+.opp-rec h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.opp-rec .ticker-badge{font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:4px;background:var(--teal2);color:white;font-weight:500}
+.opp-rec .ticker-badge.bear{background:var(--amber2)}
+.opp-rec .ticker-badge.risk{background:var(--red2)}
+.opp-rec p{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px}
+.opp-rec .entry{font-size:11px;font-family:'DM Mono',monospace;color:var(--teal);margin-top:6px}
+.opp-rec .entry.bear{color:var(--amber)}
+.opp-meta{font-size:10px;color:var(--text3);text-align:right;margin-top:16px;padding-top:10px;border-top:1px solid var(--border)}
+.regen-btn{display:flex;align-items:center;gap:8px;padding:9px 18px;background:var(--teal2);border:none;border-radius:var(--r-sm);color:white;font-size:12px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.regen-btn:hover{opacity:.85}
+.regen-btn:disabled{opacity:.4;cursor:not-allowed}
+.opp-error{background:var(--red-bg,rgba(240,64,96,.1));border:1px solid var(--red2);border-radius:var(--r);padding:16px;font-size:12px;color:var(--text2)}
 @media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}.g2,.g3,.g75,.g64{grid-template-columns:1fr}.page{padding:12px}}
 </style>
 </head>
@@ -129,6 +149,8 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
   <div class="nt" onclick="go('montecarlo',this)">Monte Carlo</div>
   <div class="nt" onclick="go('optimizer',this)">ER Optimizer</div>
   <div class="nt" onclick="go('insights',this)">Insights</div>
+  <div class="nt" onclick="go('opportunities',this)">&#129302; Opportunities</div>
+  <div class="nt" onclick="go('opportunities',this)">Opportunities</div>
   <div class="nav-right">
     <div class="ldot" id="ldot"></div>
     <span class="pts" id="pts">Loading&hellip;</span>
@@ -354,6 +376,77 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
   </div>
 </div>
 
+<!-- BUYING OPPORTUNITIES — AI-powered via Claude API -->
+<div class="page" id="page-opportunities">
+  <div class="metrics">
+    <div class="m"><div class="m-lbl">Analysis engine</div><div class="m-val" style="font-size:14px;color:var(--teal)">Claude AI</div><div class="m-sub">Live portfolio context</div></div>
+    <div class="m"><div class="m-lbl">Portfolio value</div><div class="m-val" id="opp-val">&mdash;</div><div class="m-sub">all accounts</div></div>
+    <div class="m"><div class="m-lbl">Last analyzed</div><div class="m-val" style="font-size:14px" id="opp-ts">&mdash;</div><div class="m-sub">refresh anytime</div></div>
+    <div class="m"><div class="m-lbl">Recs generated</div><div class="m-val" id="opp-count">&mdash;</div><div class="m-sub">buys &amp; protection</div></div>
+    <div class="m"><div class="m-lbl">Model</div><div class="m-val" style="font-size:14px;color:var(--purple)">Sonnet</div><div class="m-sub">claude-sonnet-4-20250514</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div style="font-size:12px;color:var(--text3);max-width:680px">
+      Claude analyzes your actual holdings, sector exposures, cost basis, and account structure — then generates personalized buy recommendations and portfolio protection strategies. Fresh analysis every time you click Generate.
+    </div>
+    <button class="regen-btn" id="opp-btn" onclick="runOpportunities()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      Generate analysis
+    </button>
+  </div>
+
+  <div id="opp-output">
+    <div class="opp-loading">
+      <div style="font-size:13px;color:var(--text3)">Click <b style="color:var(--text2)">Generate analysis</b> to run a fresh AI-powered review of your portfolio</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- BUYING OPPORTUNITIES — AI Analyst powered by Claude API -->
+<div class="page" id="page-opportunities">
+  <div class="metrics">
+    <div class="m"><div class="m-lbl">Powered by</div><div class="m-val" style="font-size:14px">Claude AI</div><div class="m-sub">Live equity analyst</div></div>
+    <div class="m"><div class="m-lbl">Analysis scope</div><div class="m-val">77</div><div class="m-sub">holdings analyzed</div></div>
+    <div class="m"><div class="m-lbl">Approach</div><div class="m-val" style="font-size:14px">Growth+</div><div class="m-sub">with bear protection</div></div>
+    <div class="m"><div class="m-lbl">Entry zones</div><div class="m-val">Live</div><div class="m-sub">recalculated each run</div></div>
+    <div class="m"><div class="m-lbl">Last run</div><div class="m-val" style="font-size:13px" id="opp-ts">&mdash;</div><div class="m-sub">refresh anytime</div></div>
+  </div>
+
+  <!-- API Key banner -->
+  <div id="opp-api-banner" style="display:none;background:var(--bg2);border:1px solid rgba(31,184,160,.35);border-radius:10px;padding:14px 18px;margin-bottom:14px;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="flex-shrink:0">
+      <div style="font-size:12px;font-weight:600;color:var(--teal);margin-bottom:3px">&#9889; Anthropic API Key Required</div>
+      <div style="font-size:11px;color:var(--text3)">Get a free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--teal)">console.anthropic.com</a> &rarr; API Keys &rarr; Create key</div>
+    </div>
+    <input type="password" id="opp-key-input" placeholder="Paste your Anthropic API key (sk-ant-...)" style="flex:1;min-width:220px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none">
+    <button onclick="saveOppKey()" style="padding:7px 16px;background:var(--teal2);border:none;border-radius:6px;color:white;font-size:12px;cursor:pointer;flex-shrink:0">Save &amp; Analyze</button>
+  </div>
+
+  <!-- Controls -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <button onclick="runAnalysis()" id="opp-run-btn" style="padding:9px 20px;background:var(--teal2);border:none;border-radius:6px;color:white;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px">
+      <span>&#9889;</span> Run AI Analysis
+    </button>
+    <div style="font-size:11px;color:var(--text3)">Analyzes your full portfolio and generates fresh recommendations &mdash; takes ~15 seconds</div>
+    <div style="margin-left:auto;font-size:11px;color:var(--text3)">Model: claude-sonnet-4-20250514</div>
+  </div>
+
+  <!-- Output area -->
+  <div id="opp-output">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:40px;text-align:center;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:12px">&#129302;</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text2);margin-bottom:6px">AI Equity Analyst</div>
+      <div style="font-size:12px;line-height:1.7">Hit <b style="color:var(--teal)">Run AI Analysis</b> to get fresh buy recommendations based on your portfolio.<br>Claude will analyze your 77 holdings, identify gaps, evaluate macro trends,<br>and suggest high-conviction opportunities with entry zones.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:10px;color:var(--text3)">
+    &#9432; Recommendations are generated by AI and are for informational purposes only. Not financial advice. Always conduct your own due diligence before investing.
+  </div>
+</div>
+
 <div class="footer">Garcia Model Portfolio Dashboard &nbsp;&middot;&nbsp; Prices via Finnhub &nbsp;&middot;&nbsp; Updated <span id="fts">&mdash;</span><br><span style="color:var(--text3)">Not investment advice. For personal use only.</span></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -526,6 +619,8 @@ function go(id,el){
   if(id==='optimizer'){renderERTable();renderERCharts();}
   if(id==='whatif')renderWIChart();
   if(id==='performance')renderPerf();
+  if(id==='opportunities'){if(window._oppInit)window._oppInit();}
+  if(id==='opportunities'){const ov=document.getElementById('opp-val');if(ov)ov.textContent=fv(TV(),0);}
 }
 
 // ============================================================
@@ -1096,6 +1191,374 @@ function renderConc(){
     </div>`;
   }).join('');
 }
+
+// ============================================================
+// BUYING OPPORTUNITIES — Claude API (Anthropic)
+// ============================================================
+async function runOpportunities(){
+  const btn = document.getElementById('opp-btn');
+  const out = document.getElementById('opp-output');
+  const tv = TV();
+
+  // Update metrics
+  const ov = document.getElementById('opp-val');
+  if(ov) ov.textContent = fv(tv,0);
+
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></div> Analyzing&hellip;';
+
+  out.innerHTML = '<div class="opp-loading"><div class="opp-spinner"></div><div style="font-size:12px;color:var(--text3)">Analyzing your portfolio&hellip; this takes about 15 seconds</div></div>';
+
+  // Build portfolio context to send to Claude
+  const top20 = H.slice().sort((a,b)=>lv(b)-lv(a)).slice(0,20);
+  const totalV = TV();
+
+  // Sector exposures
+  const sectorStr = 'Tech 27% (benchmark 32%), Industrials 17% (9%), Financials 16% (13%), Consumer Disc 10% (11%), Healthcare 9% (12%), Energy 6% (4%), CommSvc 6% (9%)';
+
+  // Account structure
+  const acctStr = 'Roth IRA 48%, 401K 19%, Individual 14%, Rollover IRA 10%, Indiv/Roth 7%, HSA 2%';
+
+  // Top holdings summary
+  const holdingsStr = top20.map(h=>`${h.t} (${h.cls}, ${h.acct}, ${(lv(h)/totalV*100).toFixed(1)}% of portfolio${h.cb>0?', cost $'+h.cb.toFixed(0)+', gain $'+h.gd.toFixed(0):''})`).join('; ');
+
+  // Notable positions
+  const losers = H.filter(h=>h.gd<-100).map(h=>`${h.t} (down $${Math.abs(h.gd).toFixed(0)})`).join(', ');
+  const bigWinners = H.filter(h=>h.gd>5000).sort((a,b)=>b.gd-a.gd).slice(0,5).map(h=>`${h.t} (+$${h.gd.toFixed(0)})`).join(', ');
+  const cash = H.find(h=>h.cls==='Cash'||h.t==='SNSXX');
+  const cashVal = cash ? lv(cash) : 0;
+
+  const prompt = `You are a senior equity analyst and portfolio strategist. Analyze this real investor portfolio and provide actionable buy recommendations and risk management strategies.
+
+PORTFOLIO OVERVIEW:
+- Total value: ${fv(totalV,0)} across 77 positions
+- Age: 35 years old, aggressive growth mandate
+- Cost basis (Fidelity accounts): $268K | Unrealized gain: +$152K (+56.7%)
+- Cash available to deploy: ${fv(cashVal,0)} (SNSXX money market)
+- Tax structure: 86% Non-Taxable (Roth IRA, 401K, Rollover IRA, HSA), 14% Taxable (Individual)
+
+TOP 20 HOLDINGS BY VALUE:
+${holdingsStr}
+
+SECTOR EXPOSURES vs S&P 500:
+${sectorStr}
+
+NOTABLE POSITIONS:
+- Biggest winners: ${bigWinners||'none >$5K gain'}
+- Underwater positions: ${losers||'none >$100 loss'}
+- Thematic satellites: Defense (XAR, SHLD, AVAV, LHX, KRKNF, ONDS), Nuclear/Power (OKLO, CCJ, VST, CEG, NRG), AI/Semis (NVDA, AMD, AVGO, CRWD, PLTR), Biotech (XBI, ISRG, HTFL, NBIS), Crypto-adjacent (IREN, CORZ)
+
+PORTFOLIO CHARACTERISTICS:
+- Account structure: ${acctStr}
+- Blended expense ratio: 0.16% (top quartile for this complexity)
+- Portfolio beta: ~1.05 vs S&P 500
+- Key underweights vs S&P: Healthcare (-3%), Comm Services (-3%), Consumer Staples (-1%)
+- Key overweights vs S&P: Industrials (+8%), Financials (+3%)
+
+YOUR TASK — provide a structured analysis with these exact sections:
+
+## GROWTH OPPORTUNITIES
+For each recommendation, provide: ticker, why it fits this portfolio specifically, business model strength, entry zone, and position sizing suggestion. Focus on highest-conviction ideas only (3-5 max). Prioritize names that complement existing exposure without overlapping.
+
+## PORTFOLIO GAPS & IMPROVEMENTS  
+Identify 2-3 specific weaknesses in the current construction and how to fix them. Be specific about what to buy/trim and why.
+
+## BEAR MARKET / DOWNSIDE PROTECTION
+Given this aggressive portfolio (beta 1.05, 96% equity, 0% bonds), what are the 2-3 most important protection moves? Include specific tickers for hedges or defensive adds. Be honest about the risk level.
+
+## SECTOR DEEP DIVE: TOP CONVICTION THEME
+Pick the single most compelling macro theme for the next 3-5 years that this portfolio is either well-positioned for OR missing. Analyze it in depth — which holdings benefit, what to add, what the bear case is.
+
+## IMMEDIATE ACTION ITEMS
+3 specific things this investor should do in the next 30 days, ranked by priority.
+
+Be direct, specific, and opinionated. This is a wealth management professional — use proper financial terminology. No disclaimers needed. Avoid generic advice. Reference specific tickers from the portfolio throughout.`;
+
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const err = await resp.text();
+      throw new Error('API error '+resp.status+': '+err.slice(0,200));
+    }
+
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+
+    if(!text){ throw new Error('Empty response from API'); }
+
+    // Render the markdown-ish response
+    out.innerHTML = renderOppOutput(text);
+
+    // Update metrics
+    const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const tsEl = document.getElementById('opp-ts');
+    if(tsEl) tsEl.textContent = ts;
+    const cntEl = document.getElementById('opp-count');
+    const recCount = (text.match(/##/g)||[]).length;
+    if(cntEl) cntEl.textContent = recCount+' sections';
+
+  }catch(err){
+    out.innerHTML = `<div class="opp-error">
+      <b style="color:var(--red)">Analysis failed</b><br><br>
+      ${err.message}<br><br>
+      <span style="color:var(--text3);font-size:11px">The Anthropic API is called directly from the browser. If you see a CORS or auth error, this feature requires the dashboard to be served via the Claude.ai artifact environment rather than a static GitHub Pages file. Try running the analysis from within this chat instead.</span>
+    </div>`;
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg> Regenerate analysis';
+  }
+}
+
+function renderOppOutput(text){
+  // Parse sections by ## headers
+  const sections = text.split(/^## /m).filter(s=>s.trim());
+  if(!sections.length) return '<div class="opp-rec"><p>'+text.replace(/\n/g,'<br>')+'</p></div>';
+
+  const sectionColors = {
+    'GROWTH':'teal','OPPORTUNITIES':'teal','GAPS':'teal','IMPROVEMENTS':'teal',
+    'BEAR':'bear','PROTECTION':'bear','DOWNSIDE':'bear',
+    'RISK':'risk','ACTION':'teal','DEEP DIVE':'teal','SECTOR':'teal','CONVICTION':'teal'
+  };
+
+  function getColor(title){
+    const up = title.toUpperCase();
+    for(const [key,col] of Object.entries(sectionColors)){
+      if(up.includes(key)) return col;
+    }
+    return 'teal';
+  }
+
+  function formatBody(body){
+    // Bold **text**
+    let h = body.replace(/\*\*([^*]+)\*\*/g,'<b style="color:var(--text)">$1</b>');
+    // Ticker mentions in backticks
+    h = h.replace(/`([A-Z]{2,6})`/g,'<span style="font-family:DM Mono,monospace;color:var(--teal);font-size:11px">$1</span>');
+    // Bullet points
+    h = h.replace(/^[-*]\s+(.+)$/gm,'<div style="display:flex;gap:8px;margin-bottom:5px"><span style="color:var(--teal);flex-shrink:0;margin-top:2px">&#8250;</span><span>$1</span></div>');
+    // Entry zone lines
+    h = h.replace(/(entry[^:]*:?\s*\$[\d,\-\s]+)/gi,'<div class="entry">$1</div>');
+    // Line breaks
+    h = h.replace(/\n\n/g,'</p><p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:8px">');
+    h = h.replace(/\n/g,'<br>');
+    return '<p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:8px">'+h+'</p>';
+  }
+
+  return '<div class="opp-section">'+sections.map(sec=>{
+    const lines = sec.trim().split('\n');
+    const title = lines[0].trim();
+    const body = lines.slice(1).join('\n').trim();
+    const col = getColor(title);
+    return `<div class="opp-rec ${col}">
+      <h4><span class="ticker-badge ${col}">${col==='bear'?'PROTECTION':col==='risk'?'RISK':'BUY/ADD'}</span>${title}</h4>
+      ${formatBody(body)}
+    </div>`;
+  }).join('')+'</div>'
+  +'<div class="opp-meta">Generated by Claude Sonnet &middot; Based on live portfolio data &middot; Not financial advice &middot; '+new Date().toLocaleString()+'</div>';
+}
+
+
+
+// ============================================================
+// BUYING OPPORTUNITIES — Claude AI Analyst
+// ============================================================
+(function(){
+  const KEY_NAME = 'garcia_anthropic_key';
+  let ANTKEY = localStorage.getItem(KEY_NAME) || '';
+
+  function init(){
+    const inp = document.getElementById('opp-key-input');
+    const banner = document.getElementById('opp-api-banner');
+    if(ANTKEY){
+      if(inp) inp.value = ANTKEY;
+      if(banner) banner.style.display = 'none';
+    } else {
+      if(banner) banner.style.display = 'flex';
+    }
+  }
+
+  window.saveOppKey = function(){
+    const inp = document.getElementById('opp-key-input');
+    if(!inp || !inp.value.trim()) return;
+    ANTKEY = inp.value.trim();
+    localStorage.setItem(KEY_NAME, ANTKEY);
+    document.getElementById('opp-api-banner').style.display = 'none';
+    runAnalysis();
+  };
+
+  window.runAnalysis = async function(){
+    if(!ANTKEY){
+      document.getElementById('opp-api-banner').style.display = 'flex';
+      return;
+    }
+
+    const btn = document.getElementById('opp-run-btn');
+    const out = document.getElementById('opp-output');
+    btn.disabled = true;
+    btn.innerHTML = '<span style="animation:spin .7s linear infinite;display:inline-block">&#8635;</span> Analyzing&hellip;';
+
+    // Build portfolio summary to send to Claude
+    const tv = TV();
+    const top15 = H.slice().sort((a,b)=>lv(b)-lv(a)).slice(0,15).map(h=>`${h.t} (${h.cls}, ${(lv(h)/tv*100).toFixed(1)}%)`).join(', ');
+    const sectors = 'Tech 27%, Industrials 17%, Financials 16%, ConsDisc 10%, Healthcare 9%, CommSvc 6%, Energy 6%, ConsStaples 5%, RE 3%, Materials 3%, Utilities 2%';
+    const clsGroups = {};
+    H.forEach(h=>{ clsGroups[h.cls] = (clsGroups[h.cls]||0)+lv(h); });
+    const clsSummary = Object.entries(clsGroups).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: ${(v/tv*100).toFixed(1)}%`).join(', ');
+    const allTickers = [...new Set(H.map(h=>h.t))].join(', ');
+    const losers = H.filter(h=>h.gd<-100).map(h=>`${h.t} (${fg(h.gd||0)})`).join(', ') || 'none significant';
+
+    const systemPrompt = `You are a senior equity analyst and portfolio strategist with 20+ years of experience at a top-tier hedge fund. You combine deep fundamental analysis with macro awareness. You are direct, specific, and actionable. You think independently and are not afraid to go against consensus when the data supports it. Format your response using clean HTML that will render inside a dark-themed dashboard (background #0c0f1a, text #e8eaf0). Use these exact CSS classes and inline styles for formatting.`;
+
+    const userPrompt = `Analyze this portfolio and provide buying opportunities. Be a real analyst — specific, opinionated, and actionable.
+
+PORTFOLIO OVERVIEW:
+- Total value: ${fv(tv,0)}
+- 77 positions across Roth IRA, 401K, Rollover IRA, Individual, HSA accounts
+- 86% Non-Taxable accounts
+
+TOP 15 HOLDINGS: ${top15}
+
+ALL TICKERS HELD: ${allTickers}
+
+SECTOR WEIGHTS (vs S&P): ${sectors}
+S&P benchmark: Tech 32%, Industrials 9%, Financials 13%, ConsDisc 11%, Healthcare 12%, CommSvc 9%, Energy 4%, ConsStaples 6%, RE 2%, Materials 2%, Utilities 2%
+
+CLASSIFICATION BREAKDOWN: ${clsSummary}
+
+NOTABLE LOSERS (tax-loss candidates): ${losers}
+
+INVESTMENT MANDATE: Aggressive growth with bear market protection. Age 35, long horizon. Already has strong exposure to: defense/aerospace, nuclear power, AI/semiconductors, industrial renaissance, biotech. Wants heavy growth opportunities but also hedges if bear market comes.
+
+GAPS I've identified that need your validation or rejection:
+- Healthcare is 9% vs 12% benchmark (underweight)
+- No direct bitcoin/crypto ETF (has IREN + CORZ for infrastructure)
+- No international small cap
+- No direct commodity inflation hedge beyond GLTR and ALPS
+
+Please provide:
+
+1. **MACRO OUTLOOK** (3-4 sentences): Your honest current macro view — where are we in the cycle, what are the top 3 risks, what tailwinds matter for this portfolio
+
+2. **TOP BUY OPPORTUNITIES** (5-7 ideas): For each provide:
+   - Why it fits THIS specific portfolio (mention actual holdings it complements or gaps it fills)
+   - Business model & competitive moat in 2 sentences
+   - Key risk to be aware of
+   - Suggested entry zone (price range)
+   - Conviction level: HIGH / MEDIUM / SPECULATIVE
+   - Position sizing suggestion (% of portfolio)
+
+3. **BEAR MARKET PROTECTION** (2-3 ideas): Hedges or defensive plays that make sense given THIS portfolio's aggressive tilt. Be specific about WHY each one works as a hedge against the existing holdings.
+
+4. **PORTFOLIO SURGERY** (1-2 things to consider selling or trimming): Be honest. If something looks weak or redundant, say so.
+
+Format using HTML. Use this structure for each recommendation:
+<div style="background:#1a2035;border:1px solid #ffffff12;border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid [COLOR]">
+  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
+    <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:[COLOR];width:60px;flex-shrink:0">[TICKER]</span>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:#e8eaf0;margin-bottom:3px">[COMPANY NAME] — [THEME]</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:[COLOR]22;color:[COLOR];font-weight:500">[CONVICTION]</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(245,158,11,.15);color:#f59e0b;font-weight:500">Entry: [PRICE RANGE]</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.06);color:#8b91a8;font-weight:500">Size: [X]% of portfolio</span>
+      </div>
+      <div style="font-size:12px;color:#8b91a8;line-height:1.65">[FULL ANALYSIS]</div>
+    </div>
+  </div>
+</div>
+
+For section headers use:
+<div style="font-size:11px;font-weight:600;color:#8b91a8;text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #ffffff12">[SECTION TITLE]</div>
+
+For the macro outlook use a plain styled div with font-size:12px, color:#8b91a8, line-height:1.7, padding:14px, background:#1a2035, border-radius:8px, margin-bottom:16px.
+
+Be brutally honest and genuinely useful. This person works in wealth management and will see through generic advice.`;
+
+    out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="animation:spin .7s linear infinite;display:inline-block;font-size:16px">&#8635;</span>
+        Claude is analyzing your portfolio&hellip;
+      </div>
+      <div id="opp-stream" style="font-size:12px;color:var(--text2);line-height:1.7"></div>
+    </div>`;
+
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTKEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          stream: true,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+
+      if(!resp.ok){
+        const err = await resp.json().catch(()=>({error:{message:resp.statusText}}));
+        if(resp.status === 401){
+          out.innerHTML = `<div style="background:var(--bg2);border:1px solid rgba(240,64,96,.3);border-radius:10px;padding:20px;color:#f04060">Invalid API key. Please check your Anthropic key and try again.</div>`;
+          localStorage.removeItem(KEY_NAME); ANTKEY='';
+          document.getElementById('opp-api-banner').style.display='flex';
+        } else {
+          out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;color:var(--red)">Error: ${err?.error?.message||resp.statusText}</div>`;
+        }
+        btn.disabled=false; btn.innerHTML='<span>&#9889;</span> Run AI Analysis'; return;
+      }
+
+      // Stream the response
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      const streamEl = document.getElementById('opp-stream');
+      let fullText = '';
+
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(l=>l.startsWith('data: '));
+        for(const line of lines){
+          const data = line.slice(6);
+          if(data==='[DONE]') continue;
+          try{
+            const parsed = JSON.parse(data);
+            if(parsed.type==='content_block_delta' && parsed.delta?.type==='text_delta'){
+              fullText += parsed.delta.text;
+              streamEl.innerHTML = fullText;
+            }
+          } catch(e){}
+        }
+      }
+
+      // Wrap in final card
+      out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px">${fullText}</div>`;
+      document.getElementById('opp-ts').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+
+    } catch(e){
+      out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;color:var(--red)">Network error: ${e.message}</div>`;
+    }
+
+    btn.disabled=false;
+    btn.innerHTML='<span>&#9889;</span> Run AI Analysis';
+  };
+
+  // Auto-init when tab is opened
+  window._oppInit = init;
+})();
 
 // ============================================================
 // BOOT
