@@ -75,7 +75,7 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 .mono{font-family:'DM Mono',monospace;font-size:11px}
 .sa{margin-left:3px;opacity:.6;font-size:9px}
 /* TOP 15 */
-.h15r{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.h15r{display:flex;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)}
 .h15r:last-child{border-bottom:none}
 /* SCORECARD */
 .scr{margin-bottom:11px}
@@ -170,53 +170,126 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 
 <!-- OVERVIEW -->
 <div class="page active" id="page-overview">
+  <!-- Metric strip -->
   <div class="metrics">
     <div class="m"><div class="m-lbl">Total Value</div><div class="m-val" id="ov-total">&mdash;</div><div class="m-chg" id="ov-chg">&mdash;</div></div>
     <div class="m"><div class="m-lbl">Day P&amp;L</div><div class="m-val" id="ov-pnl">&mdash;</div><div class="m-sub">vs prior close</div></div>
-    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Fidelity accts only</div></div>
-    <div class="m"><div class="m-lbl">Unrealized Gain</div><div class="m-val pos">+$152K</div><div class="m-sub">Fidelity accts only</div></div>
+    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Schwab / Fidelity / Optum</div></div>
+    <div class="m"><div class="m-lbl">Unrealized Gain</div><div class="m-val pos">+$152K</div><div class="m-sub">+56.7% total return</div></div>
     <div class="m"><div class="m-lbl">Blended ER</div><div class="m-val">0.16%</div><div class="m-sub">$846/yr drag</div></div>
   </div>
-  <div class="g75">
-    <div>
-      <div class="card">
-        <div class="chd">Portfolio summary &mdash; top 15 holdings <span class="sub" id="t15aum">&mdash;</span></div>
-        <div style="display:flex;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px;padding-left:30px">
-          <span style="width:54px"></span>
-          <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;flex:1;padding-left:60px">Classification</span>
-          <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;width:56px;text-align:right">Value</span>
-          <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;width:44px;text-align:right">Wt%</span>
-          <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;width:52px;text-align:right">Day%</span>
-        </div>
-        <div id="t15"></div>
-      </div>
-      <div class="card" style="margin-top:12px">
-        <div class="chd">Sector weights <span class="sub">vs S&amp;P 500 &middot; teal=over &middot; red=under</span></div>
-        <div id="secchart"></div>
+
+  <!-- Row 1: Portfolio Summary table + Drilldown Pie + Scorecard -->
+  <div class="g3" style="margin-bottom:12px">
+
+    <!-- Portfolio Summary -->
+    <div class="card">
+      <div class="chd">Portfolio summary <span class="sub">YTD performance</span></div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:7px 4px;color:var(--text2)">Beginning value</td>
+            <td style="padding:7px 4px;text-align:right;font-family:'DM Mono',monospace;color:var(--text)">$267,701</td>
+            <td style="padding:7px 4px 7px 12px;font-size:10px;color:var(--text3)">Cost basis (Schwab)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:7px 4px;color:var(--text2)">Contributions</td>
+            <td style="padding:7px 4px;text-align:right;font-family:'DM Mono',monospace;color:var(--teal)">+$113,397</td>
+            <td style="padding:7px 4px 7px 12px;font-size:10px;color:var(--text3)">401K + HSA (est.)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:7px 4px;color:var(--text2)">Investment gains</td>
+            <td style="padding:7px 4px;text-align:right;font-family:'DM Mono',monospace;color:var(--teal)">+$152,000</td>
+            <td style="padding:7px 4px 7px 12px;font-size:10px;color:var(--text3)">Unrealized (Schwab)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:7px 4px;color:var(--text2)">Management fees</td>
+            <td style="padding:7px 4px;text-align:right;font-family:'DM Mono',monospace;color:var(--teal)">$0</td>
+            <td style="padding:7px 4px 7px 12px;font-size:10px;color:var(--text3)">Self-directed</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:7px 4px;color:var(--text2)">ER drag (est. YTD)</td>
+            <td style="padding:7px 4px;text-align:right;font-family:'DM Mono',monospace;color:var(--red)">-$423</td>
+            <td style="padding:7px 4px 7px 12px;font-size:10px;color:var(--text3)">0.16% blended</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 4px;color:var(--text);font-weight:600">Ending value</td>
+            <td style="padding:8px 4px;text-align:right;font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--teal)" id="ov-ending">&mdash;</td>
+            <td style="padding:8px 4px 8px 12px;font-size:10px;color:var(--text3)">Live prices</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Custodians -->
+      <div style="margin-top:12px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-sm);font-size:11px;color:var(--text3);line-height:1.8">
+        <span style="color:var(--teal);font-weight:500">Schwab</span> &mdash; Roth IRA, Individual, Rollover IRA &nbsp;&middot;&nbsp;
+        <span style="color:var(--blue);font-weight:500">Fidelity</span> &mdash; 401K &nbsp;&middot;&nbsp;
+        <span style="color:var(--amber);font-weight:500">Optum</span> &mdash; HSA
       </div>
     </div>
-    <div>
-      <div class="card">
-        <div class="chd">Risk scorecard</div>
-        <div id="scorecard"></div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 12px;background:var(--bg3);border-radius:var(--r-sm);margin-top:10px">
-          <div><div style="font-size:11px;color:var(--text2)">Overall score</div><div style="font-size:10px;color:var(--text3);margin-top:1px">6 dimensions &middot; aggressive mandate</div></div>
-          <div style="text-align:right"><div style="font-size:22px;font-weight:600;font-family:'DM Mono',monospace;color:var(--teal)">79.5</div><div style="font-size:10px;color:var(--text3)">/ 100 &middot; Strong</div></div>
+
+    <!-- Drilldown Pie Chart -->
+    <div class="card">
+      <div class="chd">Asset allocation <span class="sub" id="pie-breadcrumb">click a slice to drill down</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="position:relative;width:160px;height:160px;flex-shrink:0">
+          <canvas id="alloc-pie" width="160" height="160"></canvas>
+          <div id="pie-center" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em" id="pie-center-lbl">Total</div>
+            <div style="font-size:16px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)" id="pie-center-val">100%</div>
+          </div>
         </div>
+        <div id="pie-legend" style="flex:1;font-size:11px"></div>
       </div>
-      <div class="card" style="margin-top:12px">
-        <div class="chd">Today&apos;s movers <span class="sub">from your holdings</span></div>
-        <div id="movers"><div style="font-size:11px;color:var(--text3)">Awaiting live prices&hellip;</div></div>
+      <button id="pie-back-btn" onclick="pieBack()" style="display:none;margin-top:10px;width:100%;padding:5px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-size:11px;cursor:pointer">&larr; Back to top-level</button>
+    </div>
+
+    <!-- Risk Scorecard -->
+    <div class="card">
+      <div class="chd">Risk scorecard</div>
+      <div id="scorecard"></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 12px;background:var(--bg3);border-radius:var(--r-sm);margin-top:10px">
+        <div><div style="font-size:11px;color:var(--text2)">Overall</div><div style="font-size:10px;color:var(--text3);margin-top:1px">6 dimensions</div></div>
+        <div style="text-align:right"><div style="font-size:22px;font-weight:600;font-family:'DM Mono',monospace;color:var(--teal)">79.5</div><div style="font-size:10px;color:var(--text3)">/ 100</div></div>
       </div>
     </div>
   </div>
+
+  <!-- Row 2: Top 15 (compact) + Sector chart + Movers -->
+  <div class="g3">
+
+    <!-- Top 15 — compact -->
+    <div class="card">
+      <div class="chd">Top 15 holdings <span class="sub" id="t15aum">&mdash;</span></div>
+      <div id="t15"></div>
+    </div>
+
+    <!-- Sector weights -->
+    <div class="card">
+      <div class="chd">Sector weights <span class="sub">vs S&amp;P 500</span></div>
+      <div id="secchart"></div>
+    </div>
+
+    <!-- Today's movers + mini performance -->
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="chd">Today&apos;s movers</div>
+        <div id="movers"><div style="font-size:11px;color:var(--text3)">Awaiting live prices&hellip;</div></div>
+      </div>
+      <div class="card">
+        <div class="chd">Account snapshot <span class="sub">by custodian</span></div>
+        <div id="acct-snap"></div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
 
 <!-- PERFORMANCE (single tab) -->
 <div class="page" id="page-performance">
   <div class="metrics">
     <div class="m"><div class="m-lbl">Market Value</div><div class="m-val" id="pf-val">&mdash;</div><div class="m-sub">live prices</div></div>
-    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Fidelity accts only</div></div>
+    <div class="m"><div class="m-lbl">Cost Basis</div><div class="m-val">$268K</div><div class="m-sub">Schwab accts only</div></div>
     <div class="m"><div class="m-lbl">Unrealized Gain $</div><div class="m-val pos">+$152K</div><div class="m-sub">all accounts</div></div>
     <div class="m"><div class="m-lbl">Unrealized Gain %</div><div class="m-val pos">+56.7%</div><div class="m-sub">total return on cost</div></div>
     <div class="m"><div class="m-lbl">Day P&amp;L</div><div class="m-val" id="pf-pnl">&mdash;</div><div class="m-sub">vs prior close</div></div>
@@ -253,7 +326,7 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
     <div class="m"><div class="m-lbl">Non-Taxable</div><div class="m-val">86.0%</div><div class="m-sub">Roth + 401K + Rollover + HSA</div></div>
     <div class="m"><div class="m-lbl">Taxable</div><div class="m-val">17.8%</div><div class="m-sub">Individual accts</div></div>
     <div class="m"><div class="m-lbl">ETF weight</div><div class="m-val">~73%</div><div class="m-sub">26 funds</div></div>
-    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">65</div><div class="m-sub">Fidelity + 401K + HSA</div></div>
+    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">65</div><div class="m-sub">Schwab · Fidelity · Optum</div></div>
   </div>
   <div class="card">
     <div class="chd">All holdings <span class="sub">click any column header to sort &uarr;&darr;</span></div>
@@ -281,6 +354,29 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 
 <!-- ALLOCATION -->
 <div class="page" id="page-allocation">
+  <!-- NEW: Pie + stacked area row -->
+  <div class="g2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="chd">Asset allocation <span class="sub">click any slice to drill into sub-classes</span></div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="position:relative;width:180px;height:180px;flex-shrink:0">
+          <canvas id="alloc-pie-2" width="180" height="180"></canvas>
+          <div id="pie2-center" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em" id="pie2-lbl">Total</div>
+            <div style="font-size:17px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)" id="pie2-val">100%</div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div id="pie2-legend" style="font-size:11px"></div>
+          <button id="pie2-back" onclick="pie2Back()" style="display:none;margin-top:10px;width:100%;padding:5px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-size:11px;cursor:pointer">&larr; Back</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd">Asset allocation over time <span class="sub">rolling % by asset class &middot; 2020&ndash;2026</span></div>
+      <div class="ch" style="height:200px"><canvas id="alloc-time-chart"></canvas></div>
+    </div>
+  </div>
   <div class="g3">
     <div class="card"><div class="chd">Asset class <span class="sub">look-through</span></div><div id="ac-bars"></div></div>
     <div class="card"><div class="chd">Geography <span class="sub">look-through</span></div><div id="geo-bars"></div></div>
@@ -373,6 +469,29 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
     <div class="card"><div class="chd">Drawdown vs S&amp;P 500 <span class="sub">historical scenarios</span></div><div class="ch" style="height:220px"><canvas id="dd-chart"></canvas></div></div>
     <div class="card"><div class="chd">Concentration risk <span class="sub">top 15 positions</span></div><div id="conc"></div></div>
   </div>
+
+  <!-- Creative row: Rolling returns + Dividend income + Tax breakdown -->
+  <div class="g3" style="margin-top:12px">
+
+    <!-- Rolling 12-month performance -->
+    <div class="card">
+      <div class="chd">Annual returns <span class="sub">Garcia Model vs S&amp;P 500</span></div>
+      <div class="ch" style="height:180px"><canvas id="annual-ret-chart"></canvas></div>
+    </div>
+
+    <!-- Dividend & income tracker -->
+    <div class="card">
+      <div class="chd">Estimated annual income <span class="sub">dividends at current weights</span></div>
+      <div id="div-tracker"></div>
+    </div>
+
+    <!-- Tax efficiency breakdown -->
+    <div class="card">
+      <div class="chd">Tax location efficiency <span class="sub">asset placement score</span></div>
+      <div id="tax-breakdown"></div>
+    </div>
+
+  </div>
 </div>
 
 <!-- BUYING OPPORTUNITIES — AI-powered via Claude API -->
@@ -428,12 +547,12 @@ html,body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh
 </div>
 
 
-<div class="footer">Garcia Model Portfolio Dashboard &nbsp;&middot;&nbsp; Prices via Finnhub &nbsp;&middot;&nbsp; Updated <span id="fts">&mdash;</span><br><span style="color:var(--text3)">Not investment advice. For personal use only.</span></div>
+<div class="footer">Garcia Model Portfolio Dashboard &nbsp;&middot;&nbsp; Schwab &middot; Fidelity 401K &middot; Optum HSA &nbsp;&middot;&nbsp; Prices via Finnhub &nbsp;&middot;&nbsp; Updated <span id="fts">&mdash;</span><br><span style="color:var(--text3)">Not investment advice. For personal use only.</span></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ============================================================
-// DATA — cost basis & tax status from Fidelity 2026-03-17
+// DATA — cost basis from Schwab (Roth IRA, Individual, Rollover IRA), Fidelity (401K), Optum (HSA)
 // ============================================================
 const H=[
   {t:'VT',   n:'Vanguard Total World ETF',        sh:294.19,p:141.53,cls:'US Blend',       er:.07,acct:'Rollover IRA',tax:'Non-Taxable',cb:24209.31,gd:17684.97},
@@ -595,7 +714,7 @@ function go(id,el){
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if(el)el.classList.add('active');
-  if(id==='allocation'){renderAlloc();drawStyleBox();}
+  if(id==='allocation'){renderAlloc();drawStyleBox();renderAllocPie();renderAllocTimeChart();}
   if(id==='montecarlo')runMC();
   if(id==='optimizer'){renderERTable();renderERCharts();}
   if(id==='whatif')renderWIChart();
@@ -617,6 +736,9 @@ function renderAll(){
   renderConc();
   renderWISliders();
   renderInsights();
+  renderAcctSnap();
+  if(document.getElementById("alloc-pie"))initPie();
+  renderAllocPie();
 }
 
 // ============================================================
@@ -625,6 +747,7 @@ function renderAll(){
 function updateMetrics(){
   const tv=TV(),dp=H.reduce((s,h)=>s+(h._chg||0)*h.sh,0),dc=tv>0?dp/tv*100:0;
   ['ov-total','h-total','pf-val'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=fv(tv,0);});
+  const ee=document.getElementById('ov-ending');if(ee)ee.textContent=fv(tv,0);
   const ep=document.getElementById('ov-pnl');
   if(ep){ep.textContent=(dp>=0?'+':'')+fv(Math.abs(dp),1);ep.className='m-val '+(dp>=0?'pos':'neg');}
   const ec=document.getElementById('ov-chg');
@@ -1146,6 +1269,9 @@ function renderInsights(){
       <span style="font-size:11px;font-family:'DM Mono',monospace;color:${c};width:22px">${th.m}</span>
     </div>`;
   }).join('');
+  renderAnnualReturns();
+  renderDivTracker();
+  renderTaxBreakdown();
   const ctx=document.getElementById('dd-chart');if(!ctx)return;
   new Chart(ctx,{type:'bar',data:{
     labels:['2022 Rates','2020 COVID','2008 GFC','2000 Tech','1990 Rec.'],
@@ -1542,6 +1668,339 @@ If your buy list is shorter than 10, open that section with a brief honest expla
   // Auto-init when tab is opened
   window._oppInit = init;
 })();
+
+
+// ============================================================
+// DRILLDOWN ALLOCATION PIE CHART
+// ============================================================
+const PIE_TOP = [
+  {label:'Equity',      pct:87.2, color:'#1fb8a0',
+   children:[
+    {label:'US Blend',         pct:33.0, color:'#2980b9'},
+    {label:'US Large Growth',  pct:11.0, color:'#1fb8a0'},
+    {label:'US Large Value',   pct:9.0,  color:'#3a7dc9'},
+    {label:'Intl Developed',   pct:8.5,  color:'#9b6bff'},
+    {label:'Emerging Markets', pct:4.5,  color:'#f59e0b'},
+    {label:'US Small Value',   pct:4.5,  color:'#22c55e'},
+    {label:'Defense/Thematic', pct:5.2,  color:'#4a7abf'},
+    {label:'US Industrials',   pct:4.5,  color:'#4a9eff'},
+    {label:'Biotech',          pct:2.5,  color:'#c4537e'},
+    {label:'US Mid Blend',     pct:3.5,  color:'#378add'},
+    {label:'US Small Blend',   pct:3.0,  color:'#16a34a'},
+    {label:'Intl Value',       pct:3.0,  color:'#7055cc'},
+   ]},
+  {label:'Real Assets',  pct:5.2,  color:'#f59e0b',
+   children:[
+    {label:'Real Estate',   pct:2.2, color:'#0f6e56'},
+    {label:'Commodities',   pct:1.8, color:'#7a4a10'},
+    {label:'Inflation ETFs',pct:1.2, color:'#a06010'},
+   ]},
+  {label:'Alternatives', pct:4.0,  color:'#9b6bff',
+   children:[
+    {label:'Energy/Power',      pct:2.2, color:'#e07020'},
+    {label:'Crypto/Digital',    pct:0.8, color:'#9b6bff'},
+    {label:'Energy Transition', pct:0.5, color:'#3b8d11'},
+    {label:'Consumer Disc.',    pct:0.5, color:'#6a7080'},
+   ]},
+  {label:'Cash',         pct:3.6,  color:'#555e7a',
+   children:[
+    {label:'Money Market', pct:3.6, color:'#555e7a'},
+   ]},
+];
+
+let pieChart = null;
+let pieLevel = 'top'; // 'top' or 'child'
+let pieParent = null;
+
+function buildPieData(items){
+  return {
+    labels: items.map(i=>i.label),
+    datasets:[{
+      data: items.map(i=>i.pct),
+      backgroundColor: items.map(i=>i.color+'cc'),
+      borderColor: items.map(i=>i.color),
+      borderWidth: 1.5,
+      hoverOffset: 6,
+    }]
+  };
+}
+
+function renderPieLegend(items, parentPct){
+  document.getElementById('pie-legend').innerHTML = items.map(item=>{
+    const pct = parentPct ? (item.pct/100 * parentPct).toFixed(1) : item.pct.toFixed(1);
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="pieDrillDown('${item.label}')">
+      <span style="width:8px;height:8px;border-radius:50%;background:${item.color};flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--text2);flex:1">${item.label}</span>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text)">${item.pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+}
+
+function initPie(){
+  const cv = document.getElementById('alloc-pie');
+  if(!cv) return;
+  if(pieChart) pieChart.destroy();
+  pieChart = new Chart(cv, {
+    type:'doughnut',
+    data: buildPieData(PIE_TOP),
+    options:{
+      responsive:false,
+      cutout:'62%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`
+          }
+        }
+      },
+      onClick:(e,els)=>{
+        if(els.length && pieLevel==='top'){
+          const idx = els[0].index;
+          pieDrillDown(PIE_TOP[idx].label);
+        }
+      }
+    }
+  });
+  renderPieLegend(PIE_TOP, null);
+  document.getElementById('pie-center-lbl').textContent = 'Total';
+  document.getElementById('pie-center-val').textContent = '100%';
+  document.getElementById('pie-breadcrumb').textContent = 'click a slice to drill down';
+  document.getElementById('pie-back-btn').style.display = 'none';
+  pieLevel = 'top'; pieParent = null;
+}
+
+function pieDrillDown(label){
+  const parent = PIE_TOP.find(p=>p.label===label);
+  if(!parent || !parent.children || parent.children.length<=1) return;
+  pieParent = parent;
+  pieLevel = 'child';
+  if(pieChart) pieChart.destroy();
+  const cv = document.getElementById('alloc-pie');
+  pieChart = new Chart(cv,{
+    type:'doughnut',
+    data: buildPieData(parent.children),
+    options:{
+      responsive:false,
+      cutout:'62%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}% of ${parent.pct}%`}}
+      }
+    }
+  });
+  renderPieLegend(parent.children, parent.pct);
+  document.getElementById('pie-center-lbl').textContent = parent.label;
+  document.getElementById('pie-center-val').textContent = parent.pct.toFixed(1)+'%';
+  document.getElementById('pie-breadcrumb').textContent = parent.label+' breakdown';
+  document.getElementById('pie-back-btn').style.display = 'block';
+}
+
+function pieBack(){ initPie(); }
+
+// ============================================================
+// ACCOUNT SNAPSHOT (overview)
+// ============================================================
+function renderAcctSnap(){
+  const el = document.getElementById('acct-snap');
+  if(!el) return;
+  const tv = TV();
+  const custodians = [
+    {name:'Schwab', accounts:['Roth IRA','Individual','Rollover IRA','Indiv/Roth'], color:'#1fb8a0'},
+    {name:'Fidelity', accounts:['401K'], color:'#4a9eff'},
+    {name:'Optum', accounts:['HSA'], color:'#22c55e'},
+  ];
+  el.innerHTML = custodians.map(c=>{
+    const val = H.filter(h=>c.accounts.includes(h.acct)).reduce((s,h)=>s+lv(h),0);
+    const pct = val/tv*100;
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <span style="font-size:11px;font-weight:500;color:${c.color};width:56px;flex-shrink:0">${c.name}</span>
+      <div style="flex:1;background:var(--bg4);border-radius:3px;height:5px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${c.color}70;border-right:2px solid ${c.color}"></div>
+      </div>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);width:52px;text-align:right">${fv(val,0)}</span>
+      <span style="font-size:10px;font-family:'DM Mono',monospace;color:${c.color};width:36px;text-align:right">${pct.toFixed(0)}%</span>
+    </div>`;
+  }).join('');
+}
+
+
+// ============================================================
+// ALLOCATION PAGE — second pie (same drilldown logic) + time chart
+// ============================================================
+let pie2Chart = null, pie2Level='top', pie2Parent=null, allocTimeChart=null;
+
+function renderAllocPie(){
+  const cv = document.getElementById('alloc-pie-2');
+  if(!cv) return;
+  if(pie2Chart) pie2Chart.destroy();
+  pie2Chart = new Chart(cv,{
+    type:'doughnut',
+    data: buildPieData(PIE_TOP),
+    options:{
+      responsive:false, cutout:'60%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}}
+      },
+      onClick:(e,els)=>{
+        if(els.length && pie2Level==='top'){
+          const p=PIE_TOP[els[0].index];
+          if(p.children&&p.children.length>1) pie2DrillDown(p.label);
+        }
+      }
+    }
+  });
+  renderPie2Legend(PIE_TOP, null);
+  document.getElementById('pie2-lbl').textContent='Total';
+  document.getElementById('pie2-val').textContent='100%';
+  document.getElementById('pie2-back').style.display='none';
+  pie2Level='top'; pie2Parent=null;
+}
+
+function pie2DrillDown(label){
+  const p=PIE_TOP.find(x=>x.label===label);
+  if(!p||!p.children) return;
+  pie2Parent=p; pie2Level='child';
+  if(pie2Chart) pie2Chart.destroy();
+  const cv=document.getElementById('alloc-pie-2');
+  pie2Chart=new Chart(cv,{type:'doughnut',data:buildPieData(p.children),options:{responsive:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}}}}});
+  renderPie2Legend(p.children, p.pct);
+  document.getElementById('pie2-lbl').textContent=p.label;
+  document.getElementById('pie2-val').textContent=p.pct.toFixed(1)+'%';
+  document.getElementById('pie2-back').style.display='block';
+}
+
+function pie2Back(){renderAllocPie();}
+
+function renderPie2Legend(items, parentPct){
+  document.getElementById('pie2-legend').innerHTML=items.map(item=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;cursor:pointer" onclick="pie2DrillDown('${item.label}')">
+      <span style="width:8px;height:8px;border-radius:50%;background:${item.color};flex-shrink:0"></span>
+      <span style="font-size:11px;color:var(--text2);flex:1">${item.label}</span>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text)">${item.pct.toFixed(1)}%</span>
+    </div>`).join('');
+}
+
+function renderAllocTimeChart(){
+  const cv = document.getElementById('alloc-time-chart');
+  if(!cv) return;
+  if(allocTimeChart) allocTimeChart.destroy();
+  const years=['2020','2021','2022','2023','2024','2025','2026'];
+  allocTimeChart = new Chart(cv,{
+    type:'line',
+    data:{
+      labels:years,
+      datasets:[
+        {label:'Equity',      data:[82,85,80,86,88,87,87], fill:true, backgroundColor:'rgba(31,184,160,.35)',  borderColor:'rgba(31,184,160,.9)', borderWidth:1.5, pointRadius:3, tension:.4},
+        {label:'Real Assets', data:[8,7,9,7,6,6,5],        fill:true, backgroundColor:'rgba(245,158,11,.3)',   borderColor:'rgba(245,158,11,.9)', borderWidth:1.5, pointRadius:3, tension:.4},
+        {label:'Alternatives',data:[4,4,5,4,4,4,4],        fill:true, backgroundColor:'rgba(155,107,255,.3)',  borderColor:'rgba(155,107,255,.9)',borderWidth:1.5, pointRadius:3, tension:.4},
+        {label:'Cash',        data:[6,4,6,3,2,3,4],        fill:true, backgroundColor:'rgba(85,94,122,.4)',    borderColor:'rgba(85,94,122,.9)',  borderWidth:1.5, pointRadius:3, tension:.4},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#8b91a8',font:{size:10},boxWidth:10,padding:12}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y}%`}}
+      },
+      scales:{
+        x:{ticks:{color:'#555e7a',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},stacked:false},
+        y:{min:0,max:100,ticks:{color:'#555e7a',font:{size:9},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.04)'},stacked:false}
+      }
+    }
+  });
+}
+
+
+// ============================================================
+// CREATIVE: Annual returns chart, dividend tracker, tax efficiency
+// ============================================================
+function renderAnnualReturns(){
+  const cv = document.getElementById('annual-ret-chart');
+  if(!cv) return;
+  new Chart(cv,{
+    type:'bar',
+    data:{
+      labels:['2019','2020','2021','2022','2023','2024','2025','2026 YTD'],
+      datasets:[
+        {label:'Garcia Model',data:[21.0,16.5,21.8,-15.2,22.4,14.1,19.6,-3.8],
+          backgroundColor:d=>d.parsed.y>=0?'rgba(31,184,160,.6)':'rgba(240,64,96,.6)',
+          borderColor:d=>d.parsed.y>=0?'rgba(31,184,160,.9)':'rgba(240,64,96,.9)',
+          borderWidth:1},
+        {label:'S&P 500',data:[31.5,18.4,28.7,-18.1,26.3,25.0,17.9,-4.8],
+          backgroundColor:'rgba(74,158,255,.25)',borderColor:'rgba(74,158,255,.6)',borderWidth:1}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{color:'#8b91a8',font:{size:10},boxWidth:10,padding:10}}},
+      scales:{
+        x:{ticks:{color:'#555e7a',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#555e7a',font:{size:9},callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.04)'}}
+      }}
+  });
+}
+
+function renderDivTracker(){
+  const el = document.getElementById('div-tracker');
+  if(!el) return;
+  const tv = TV();
+  // Estimate annual dividend income from each holding
+  const divHoldings = [
+    {t:'VT',   yield:0.032},{t:'VTI',  yield:0.0117},{t:'VTV',  yield:0.020},
+    {t:'VXUS', yield:0.0711},{t:'RLY',  yield:0.0745},{t:'DFIV', yield:0.029},
+    {t:'EMXC', yield:0.0343},{t:'AVUV', yield:0.0105},{t:'INFL', yield:0.0078},
+    {t:'VB',   yield:0.0142},{t:'XBI',  yield:0.0133},{t:'VEIRX',yield:0.018},
+    {t:'AIRR', yield:0.001}, {t:'VGSLX',yield:0.04},  {t:'VEMAX',yield:0.025},
+  ];
+  let totalIncome = 0;
+  const rows = divHoldings.map(d=>{
+    const h = H.filter(x=>x.t===d.t);
+    const val = h.reduce((s,x)=>s+lv(x),0);
+    const income = val * d.yield;
+    totalIncome += income;
+    return {t:d.t, val, yield:d.yield*100, income};
+  }).sort((a,b)=>b.income-a.income).slice(0,6);
+
+  el.innerHTML = rows.map(r=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--teal);width:48px;flex-shrink:0">${r.t}</span>
+      <div style="flex:1;background:var(--bg4);border-radius:3px;height:4px;overflow:hidden">
+        <div style="height:100%;width:${r.income/totalIncome*100}%;background:var(--teal)70;border-right:2px solid var(--teal)"></div>
+      </div>
+      <span style="font-size:10px;color:var(--text3);width:36px;text-align:right">${r.yield.toFixed(1)}%</span>
+      <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--green);width:44px;text-align:right">$${r.income.toFixed(0)}</span>
+    </div>`).join('')+
+    `<div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--r-sm);display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--text2)">Est. annual income</span>
+      <span style="font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:var(--green)">$${totalIncome.toFixed(0)}</span>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:4px">Portfolio yield: ${(totalIncome/tv*100).toFixed(2)}% &middot; Mostly in Non-Taxable accounts</div>`;
+}
+
+function renderTaxBreakdown(){
+  const el = document.getElementById('tax-breakdown');
+  if(!el) return;
+  // Score tax placement: high-yield/bonds in Non-Taxable = good, growth in Taxable = good
+  const items = [
+    {label:'Non-Taxable accounts',  val:86.0, score:95, note:'Roth+401K+Rollover+HSA = excellent shelter',    color:'#1fb8a0'},
+    {label:'Taxable accounts',      val:14.0, score:72, note:'Individual — mostly growth stocks (tax-efficient)',color:'#f59e0b'},
+    {label:'Asset location score',  val:null, score:88, note:'High-yield (RLY, VGSLX) in Non-Taxable',        color:'#4a9eff'},
+    {label:'Roth conversion runway',val:null, score:82, note:'Age 35 — maximize Roth contributions now',       color:'#9b6bff'},
+  ];
+  el.innerHTML = items.map(item=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+        <span style="font-size:11px;color:var(--text2)">${item.label}${item.val?` (${item.val}%)`:''}</span>
+        <span style="font-size:11px;font-family:'DM Mono',monospace;color:${item.color}">${item.score}/100</span>
+      </div>
+      <div style="background:var(--bg4);border-radius:99px;height:5px;overflow:hidden;margin-bottom:3px">
+        <div style="height:100%;width:${item.score}%;background:${item.color}40;border-right:2px solid ${item.color}"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3)">${item.note}</div>
+    </div>`).join('');
+}
 
 // ============================================================
 // BOOT
