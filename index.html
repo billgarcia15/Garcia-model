@@ -149,7 +149,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
   <div class="nt" onclick="go('montecarlo',this)">Monte Carlo</div>
   <div class="nt" onclick="go('optimizer',this)">ER Optimizer</div>
   <div class="nt" onclick="go('insights',this)">Insights</div>
-  <div class="nt" onclick="go('opportunities',this)">&#129302; Opportunities</div>
+  <div class="nt" onclick="go('opportunities',this)">&#129302; CIO Analysis</div>
   <div class="nav-right">
     <div class="ldot" id="ldot"></div>
     <span class="pts" id="pts">Loading&hellip;</span>
@@ -534,7 +534,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
   <!-- Run button + instructions -->
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
     <button onclick="runAnalysis()" id="opp-run-btn" style="padding:9px 22px;background:var(--teal2);border:none;border-radius:6px;color:white;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px">
-      &#9889; Run AI Analysis
+      &#9889; Run CIO Analysis
     </button>
     <div style="font-size:11px;color:var(--text3)">Analyzes your full portfolio &amp; streams fresh recommendations &mdash; ~15 seconds</div>
     <div style="margin-left:auto;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace">claude-sonnet-4-20250514</div>
@@ -547,7 +547,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
       <div style="font-size:14px;font-weight:500;color:var(--text2);margin-bottom:8px">AI Equity Analyst</div>
       <div style="font-size:12px;color:var(--text3);line-height:1.8;max-width:480px;margin:0 auto">
         Enter your Anthropic API key above, then hit <b style="color:var(--teal)">Run AI Analysis</b>.<br>
-        Claude will analyze all 77 of your holdings, identify portfolio gaps,<br>evaluate macro trends, and deliver high-conviction buy ideas with entry zones.<br><br>
+        Claude — acting as CIO of a $50B family office — will deliver a full institutional-grade analysis:<br>macro regime assessment, sector rotation playbook, up to 10 high-conviction ideas with full financials,<br>bear market hedges, and an honest portfolio surgery review. ~20-30 seconds.<br><br>
         <span style="font-size:11px;opacity:.6">Your key is saved in your browser only &mdash; never sent anywhere except Anthropic.</span>
       </div>
     </div>
@@ -1571,7 +1571,7 @@ function renderOppOutput(text){
     const btn = document.getElementById('opp-run-btn');
     const out = document.getElementById('opp-output');
     btn.disabled = true;
-    btn.innerHTML = '<span style="animation:spin .7s linear infinite;display:inline-block">&#8635;</span> Analyzing&hellip;';
+    btn.innerHTML = '<span style="animation:spin .7s linear infinite;display:inline-block">&#8635;</span> CIO analysis running&hellip; (~20-30s)';
 
     // Build portfolio summary to send to Claude
     const tv = TV();
@@ -1583,74 +1583,108 @@ function renderOppOutput(text){
     const allTickers = [...new Set(H.map(h=>h.t))].join(', ');
     const losers = H.filter(h=>h.gd<-100).map(h=>`${h.t} (${fg(h.gd||0)})`).join(', ') || 'none significant';
 
-    const systemPrompt = `You are a senior equity analyst and portfolio strategist with 20+ years of experience at a top-tier hedge fund. You combine deep fundamental analysis with macro awareness. You are direct, specific, and actionable. You think independently and are not afraid to go against consensus when the data supports it. Format your response using clean HTML that will render inside a dark-themed dashboard (background #0c0f1a, text #e8eaf0). Use these exact CSS classes and inline styles for formatting.`;
+    const systemPrompt = `You are the Chief Investment Officer of a $50 billion multi-family office with 40 years of markets experience. You have managed capital through every major market cycle — Black Monday, the dot-com crash, the GFC, COVID, and the 2022 rate shock. Your analysis is read by sophisticated HNW investors who will fact-check your work. You are known for being contrarian when the data supports it, intellectually honest about uncertainty, and ruthless about cutting losing positions. You never pad a recommendation list — a short list of genuine conviction is your trademark. You think in terms of risk-adjusted returns, capital efficiency, and long-term compounding. Format all output as clean HTML that renders inside a dark dashboard (background #0c0f1a, text #e8eaf0). Never use markdown — only HTML.`;
 
-    const userPrompt = `Analyze this portfolio and provide buying opportunities. Be a real analyst — specific, opinionated, and actionable.
+    const userPrompt = `You are the Chief Investment Officer of a $50B multi-family office. Your analysis is read by sophisticated investors who will see through anything generic. Every recommendation must be grounded in real financials, real macro conditions, and genuine insight. Think in terms of risk-adjusted returns, not just upside.
 
-PORTFOLIO OVERVIEW:
-- Total value: ${fv(tv,0)}
-- 77 positions across Roth IRA, 401K, Rollover IRA, Individual, HSA accounts
-- 86% Non-Taxable accounts
+PORTFOLIO CONTEXT:
+- Total value: ${fv(tv,0)} | 62 positions across Roth IRA, 401K, Rollover IRA, Individual (Schwab), HSA (Optum)
+- Age 35 | Aggressive growth mandate | 86% non-taxable accounts | 0% bonds
+- Top 15: ${top15}
+- All tickers held: ${allTickers}
+- Sector weights: ${sectors}
+- Classification breakdown: ${clsSummary}
+- Current losers (potential TLH): ${losers}
+- Notable themes already owned: Defense/Aerospace, Nuclear/Power, AI/Semiconductors, Industrial Renaissance, Biotech, Energy Transition, Crypto Infrastructure
 
-TOP 15 HOLDINGS: ${top15}
+DELIVER THE FOLLOWING — in order, with full depth:
 
-ALL TICKERS HELD: ${allTickers}
+---
 
-SECTOR WEIGHTS (vs S&P): ${sectors}
-S&P benchmark: Tech 32%, Industrials 9%, Financials 13%, ConsDisc 11%, Healthcare 12%, CommSvc 9%, Energy 4%, ConsStaples 6%, RE 2%, Materials 2%, Utilities 2%
+## 1. MACRO REGIME ASSESSMENT
+Write 4-5 sentences on exactly where we are in the economic cycle RIGHT NOW. Cover:
+- Fed policy trajectory and what it means for risk assets
+- Credit conditions, yield curve, and any stress signals
+- Where corporate earnings are headed
+- The single biggest macro risk to this portfolio specifically
+- Which macro factor is most mispriced by the market right now
 
-CLASSIFICATION BREAKDOWN: ${clsSummary}
+---
 
-NOTABLE LOSERS (tax-loss candidates): ${losers}
+## 2. SECTOR ROTATION PLAYBOOK (next 6-12 months)
+Analyze each major sector. For EACH sector state: OVERWEIGHT / UNDERWEIGHT / NEUTRAL with a 1-2 sentence thesis. Flag which sectors are being mis-priced by sentiment vs fundamentals. Specific to the economic conditions right now — not generic. Include:
+- Industrials, Technology, Energy, Financials, Healthcare, Defense, Real Assets, Consumer
 
-INVESTMENT MANDATE: Aggressive growth with bear market protection. Age 35, long horizon. IMPORTANT: You have 40+ years of portfolio management experience. You do NOT pad recommendations to fill a list. If you only see 3 genuinely compelling ideas right now, present 3 with full conviction and explain why the bar is high. If a sector looks fully valued or risky, say so directly. Intellectual honesty is more valuable than a long list. Already has strong exposure to: defense/aerospace, nuclear power, AI/semiconductors, industrial renaissance, biotech. Wants heavy growth opportunities but also hedges if bear market comes.
+---
 
-GAPS I've identified that need your validation or rejection:
-- Healthcare is 9% vs 12% benchmark (underweight)
-- No direct bitcoin/crypto ETF (has IREN + CORZ for infrastructure)
-- No international small cap
-- No direct commodity inflation hedge beyond GLTR and ALPS
+## 3. BUY OPPORTUNITIES — up to 10, minimum 6, ONLY genuine conviction
+For each opportunity provide a full institutional-grade analysis:
 
-Please provide:
+**QUALITY OVER QUANTITY**: If you only have 6 high-conviction ideas right now, give 6 and explain why the bar is high. Never pad the list.
 
-1. **MACRO OUTLOOK** (3-4 sentences): Your honest current macro view — where are we in the cycle, what are the top 3 risks, what tailwinds matter for this portfolio
+For EACH idea include:
+- **Why this fits THIS specific portfolio** (reference actual holdings it complements, themes it extends, or gaps it fills)
+- **Business model in 2 sentences** — what they actually do and why it's durable
+- **The variant perception** — what the market is getting wrong or missing
+- **Key financials**: P/E vs industry, revenue growth, margins, debt/equity, FCF yield
+- **Competitive moat** — why this company wins long-term
+- **Bear case** — the real risk, not boilerplate
+- **Entry zone** — specific price range with rationale (support levels, valuation floor)
+- **Conviction**: HIGH / MEDIUM / SPECULATIVE
+- **Suggested sizing**: % of portfolio
+- **Time horizon**: short / medium / long term
 
-2. **TOP BUY OPPORTUNITIES** (up to 10 ideas, but ONLY include ideas you genuinely believe in — quality over quantity always): If the market looks expensive, crowded, or a sector has poor risk/reward right now, say so explicitly and list fewer ideas. A shorter list with high conviction is far more valuable than 10 mediocre ones. For each idea you DO include, provide:
-   - Why it fits THIS specific portfolio (mention actual holdings it complements or gaps it fills)
-   - Business model & competitive moat in 2 sentences
-   - Key risk to be aware of
-   - Suggested entry zone (price range)
-   - Conviction level: HIGH / MEDIUM / SPECULATIVE
-   - Position sizing suggestion (% of portfolio)
+Include a mix of:
+- Large-cap compounders being unfairly punished by sentiment
+- Mid-cap quality with expanding margins
+- Small-cap hidden gems (under $2B market cap, revenue growth 20%+, low institutional ownership)
+- At least 1 international/EM idea if compelling
+- Oversold names where market perception vs fundamentals diverge significantly
 
-3. **BEAR MARKET PROTECTION** (2-3 ideas): Hedges or defensive plays that make sense given THIS portfolio's aggressive tilt. Be specific about WHY each one works as a hedge against the existing holdings.
+---
 
-4. **PORTFOLIO SURGERY** (1-2 things to consider selling or trimming): Be honest. If something looks weak or redundant, say so.
+## 4. BEAR MARKET HEDGES & TAIL RISK PROTECTION
+Given this portfolio's aggressive tilt (beta ~1.05, 96% equity, 0% bonds):
+- 2-3 specific hedges that make structural sense RIGHT NOW
+- Explain exactly HOW each hedge protects against the specific risks in this portfolio
+- Include sizing and whether to use ETFs, options strategies, or direct positions
+- Be honest about cost of carry / opportunity cost
 
-Format using HTML. Use this structure for each recommendation:
-<div style="background:#1a2035;border:1px solid #ffffff12;border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid [COLOR]">
-  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px">
-    <span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:[COLOR];width:60px;flex-shrink:0">[TICKER]</span>
-    <div>
-      <div style="font-size:13px;font-weight:600;color:#e8eaf0;margin-bottom:3px">[COMPANY NAME] — [THEME]</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:[COLOR]22;color:[COLOR];font-weight:500">[CONVICTION]</span>
-        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(245,158,11,.15);color:#f59e0b;font-weight:500">Entry: [PRICE RANGE]</span>
-        <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.06);color:#8b91a8;font-weight:500">Size: [X]% of portfolio</span>
+---
+
+## 5. PORTFOLIO SURGERY — honest assessment
+Look at the actual holdings. What 1-3 positions should be trimmed or exited?
+- Be specific and direct — name the ticker, explain the thesis break
+- Flag any thematic overlaps wasting allocation
+- Identify any positions where the original thesis no longer holds
+
+---
+
+FORMAT RULES:
+Use clean HTML throughout. Section headers:
+<div style="font-size:13px;font-weight:700;color:#e8eaf0;text-transform:uppercase;letter-spacing:.08em;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid rgba(31,184,160,.4)">SECTION TITLE</div>
+
+For each buy recommendation use:
+<div style="background:#1a2035;border:1px solid #ffffff12;border-radius:8px;padding:16px;margin-bottom:12px;border-left:4px solid [COLOR]">
+  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:10px">
+    <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:[COLOR];width:70px;flex-shrink:0">[TICKER]</span>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600;color:#e8eaf0;margin-bottom:6px">[COMPANY] — [THEME]</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:[COLOR]22;color:[COLOR];font-weight:600">[CONVICTION]</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,.15);color:#f59e0b;font-weight:500">Entry: [RANGE]</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.07);color:#8b91a8">Size: [X]% portfolio</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.07);color:#8b91a8">Horizon: [TIMEFRAME]</span>
       </div>
-      <div style="font-size:12px;color:#8b91a8;line-height:1.65">[FULL ANALYSIS]</div>
+      <div style="font-size:13px;color:#8b91a8;line-height:1.75">[FULL ANALYSIS — financials, moat, variant perception, bear case, portfolio fit]</div>
     </div>
   </div>
 </div>
 
-For section headers use:
-<div style="font-size:11px;font-weight:600;color:#8b91a8;text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #ffffff12">[SECTION TITLE]</div>
+For sector rotation table, use a clean styled table with dark bg.
+For macro and surgery sections, use plain styled divs with font-size:13px, color:#8b91a8, line-height:1.8.
 
-For the macro outlook use a plain styled div with font-size:12px, color:#8b91a8, line-height:1.7, padding:14px, background:#1a2035, border-radius:8px, margin-bottom:16px.
-
-Be brutally honest and genuinely useful. This person works in wealth management and will see through generic advice.
-
-If your buy list is shorter than 10, open that section with a brief honest explanation of WHY — e.g. "Given current valuations in X and the macro backdrop of Y, I'm only comfortable recommending Z ideas at this time. Here's why the bar is high right now:" — then list only what you truly believe in. This context is just as valuable as the recommendations themselves.`;
+This analysis will be read by a 35-year-old wealth management professional. It must be institutional grade — specific numbers, real tickers, genuine insight. Vague statements are worse than no statement. If you are uncertain about a specific metric, say so rather than inventing it.`;
 
     out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px">
       <div style="font-size:12px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px">
@@ -1671,7 +1705,7 @@ If your buy list is shorter than 10, open that section with a brief honest expla
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 6000,
+          max_tokens: 8000,
           stream: true,
           system: systemPrompt,
           messages: [{ role: 'user', content: userPrompt }]
@@ -1687,7 +1721,7 @@ If your buy list is shorter than 10, open that section with a brief honest expla
         } else {
           out.innerHTML = `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;color:var(--red)">Error: ${err?.error?.message||resp.statusText}</div>`;
         }
-        btn.disabled=false; btn.innerHTML='<span>&#9889;</span> Run AI Analysis'; return;
+        btn.disabled=false; btn.innerHTML='<span>&#9889;</span> Run CIO Analysis'; return;
       }
 
       // Stream the response
@@ -1723,7 +1757,7 @@ If your buy list is shorter than 10, open that section with a brief honest expla
     }
 
     btn.disabled=false;
-    btn.innerHTML='<span>&#9889;</span> Run AI Analysis';
+    btn.innerHTML='<span>&#9889;</span> Run CIO Analysis';
   };
 
   // Auto-init when tab is opened
@@ -2080,20 +2114,39 @@ function getHistory() {
   try {
     const stored = localStorage.getItem(HIST_KEY);
     const recorded = stored ? JSON.parse(stored) : [];
-    const byDate = {};
-    recorded.forEach(r => byDate[r.date] = r);
-    const merged = SEED_HISTORY.map(s => byDate[s.date] || s);
-    recorded.forEach(r => { if (!SEED_HISTORY.find(s => s.date === r.date)) merged.push(r); });
-    return merged.sort((a,b) => a.date.localeCompare(b.date));
+    // Build a map: prefer stored entries over seed (stored = actual recorded values)
+    // Key by full date; for YYYY-MM entries from old format, treat as YYYY-MM-01
+    const normalize = d => d.length === 7 ? d + '-01' : d;
+    const storedMap = {};
+    recorded.forEach(r => { storedMap[normalize(r.date)] = {...r, date: normalize(r.date)}; });
+    // Seed entries, overridden by stored if same date
+    const seedNorm = SEED_HISTORY.map(s => storedMap[normalize(s.date)] || {...s, date: normalize(s.date)});
+    const seedDates = new Set(seedNorm.map(s => s.date));
+    // Add stored entries that aren't in seed
+    Object.values(storedMap).forEach(r => { if(!seedDates.has(r.date)) seedNorm.push(r); });
+    // Remove obvious duplicates: if two entries share YYYY-MM, keep the later-dated one
+    const byMonth = {};
+    seedNorm.forEach(r => {
+      const mo = r.date.slice(0,7);
+      if(!byMonth[mo] || r.date > byMonth[mo].date) byMonth[mo] = r;
+    });
+    return Object.values(byMonth).sort((a,b) => a.date.localeCompare(b.date));
   } catch(e) { return SEED_HISTORY; }
 }
 
 function recordSnapshot() {
   const tv = TV();
-  // Only save if prices look live (LP has entries) — prevents saving stale boot values
-  if(Object.keys(LP).length < 10) { console.log('Snapshot skipped — prices not loaded yet'); return; }
+  // Guard: only save when live prices are loaded
+  if(Object.keys(LP).length < 10){
+    const btn = document.getElementById('snap-btn');
+    if(btn){ btn.textContent='Load prices first'; setTimeout(()=>{ btn.textContent='Save today'; },2000); }
+    return;
+  }
+  // Use full YYYY-MM-DD date so labels render correctly
   const now = new Date();
-  const dateKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const dateKey = now.getFullYear() + '-'
+    + String(now.getMonth()+1).padStart(2,'0') + '-'
+    + String(now.getDate()).padStart(2,'0');
   const snap = {
     date: dateKey,
     roth:         Math.round(H.filter(h=>h.acct==='Roth IRA').reduce((s,h)=>s+lv(h),0)),
@@ -2107,13 +2160,19 @@ function recordSnapshot() {
   try {
     const stored = localStorage.getItem(HIST_KEY);
     const arr = stored ? JSON.parse(stored) : [];
-    const idx = arr.findIndex(r => r.date === dateKey);
-    if (idx >= 0) arr[idx] = snap; else arr.push(snap);
-    localStorage.setItem(HIST_KEY, JSON.stringify(arr));
+    // Replace any entry for the same date OR same YYYY-MM (avoid duplicates)
+    const yyyymm = dateKey.slice(0,7);
+    const filtered = arr.filter(r => !r.date.startsWith(yyyymm) || r.date === dateKey);
+    const idx = filtered.findIndex(r => r.date === dateKey);
+    if(idx >= 0) filtered[idx] = snap; else filtered.push(snap);
+    localStorage.setItem(HIST_KEY, JSON.stringify(filtered));
     renderBalanceChart();
+    const el = document.getElementById('snap-status');
+    if(el) el.textContent = 'Saved ' + dateKey + ' · $' + Math.round(tv/1000) + 'K';
     const btn = document.getElementById('snap-btn');
-    if (btn) { btn.textContent = 'Saved!'; btn.style.color='var(--green)'; setTimeout(() => { btn.textContent='Save snapshot'; btn.style.color='var(--teal)'; }, 2000); }
-  } catch(e) { console.error('Snapshot failed:', e); }
+    if(btn){ btn.textContent='✓ Saved!'; btn.style.background='var(--teal)';
+      setTimeout(()=>{ btn.textContent='💾 Save today'; btn.style.background='var(--teal2)'; },2500); }
+  } catch(e){ console.error('Snapshot error:',e); }
 }
 
 let balChart = null;
