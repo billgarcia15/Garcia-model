@@ -338,7 +338,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
     <div class="m"><div class="m-lbl">Non-Taxable</div><div class="m-val">86.0%</div><div class="m-sub">Roth + 401K + Rollover + HSA</div></div>
     <div class="m"><div class="m-lbl">Taxable</div><div class="m-val">17.8%</div><div class="m-sub">Individual accts</div></div>
     <div class="m"><div class="m-lbl">ETF weight</div><div class="m-val">~73%</div><div class="m-sub">26 funds</div></div>
-    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">65</div><div class="m-sub">Schwab · Fidelity · Optum</div></div>
+    <div class="m"><div class="m-lbl">Positions</div><div class="m-val">66</div><div class="m-sub">Schwab · Fidelity · Optum</div></div>
   </div>
   <div class="card">
     <div class="chd">All holdings <span class="sub">click any column header to sort &uarr;&darr;</span></div>
@@ -434,7 +434,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
     <div>
       <div class="card">
         <div class="chd">Retirement simulator <span class="sub">2,000 simulated paths</span></div>
-        <div class="slr"><label class="sll">Starting value ($)</label><input type="range" id="mc-s" min="100000" max="2000000" step="10000" value="529000" oninput="runMC()"><span class="slv" id="mc-sv">$529K</span></div>
+        <div class="slr"><label class="sll">Starting value ($)</label><input type="range" id="mc-s" min="100000" max="2000000" step="10000" value="533000" oninput="runMC()"><span class="slv" id="mc-sv">$533K</span></div>
         <div class="slr"><label class="sll">Monthly contribution</label><input type="range" id="mc-c" min="0" max="10000" step="100" value="3000" oninput="runMC()"><span class="slv" id="mc-cv">$3,000</span></div>
         <div class="slr"><label class="sll">Expected annual return</label><input type="range" id="mc-r" min="4" max="18" step="0.5" value="12" oninput="runMC()"><span class="slv" id="mc-rv">12.0%</span></div>
         <div class="slr"><label class="sll">Volatility (std dev)</label><input type="range" id="mc-v" min="8" max="30" step="0.5" value="17" oninput="runMC()"><span class="slv" id="mc-vv">17.0%</span></div>
@@ -455,7 +455,7 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
 <!-- ER OPTIMIZER -->
 <div class="page" id="page-optimizer">
   <div class="metrics">
-    <div class="m"><div class="m-lbl">Current blended ER</div><div class="m-val">0.160%</div><div class="m-sub">$846/yr on $529K</div></div>
+    <div class="m"><div class="m-lbl">Current blended ER</div><div class="m-val">0.160%</div><div class="m-sub">$846/yr on $533K</div></div>
     <div class="m"><div class="m-lbl">Optimized ER</div><div class="m-val pos">0.098%</div><div class="m-sub">if all swaps taken</div></div>
     <div class="m"><div class="m-lbl">Annual savings</div><div class="m-val pos">$328</div><div class="m-sub">$16,400 over 20yr</div></div>
     <div class="m"><div class="m-lbl">High-cost positions</div><div class="m-val" style="color:var(--amber)">5</div><div class="m-sub">above 0.50% ER</div></div>
@@ -567,64 +567,66 @@ html,body{background:var(--bg);color:var(--text);font-size:15px;min-height:100vh
 // DATA — cost basis from Schwab (Roth IRA, Individual, Rollover IRA), Fidelity (401K), Optum (HSA)
 // ============================================================
 const H=[
-  {t:'VT',   n:'Vanguard Total World ETF',        sh:294.19,p:141.53,cls:'US Blend',       er:.07,acct:'Rollover IRA',tax:'Non-Taxable',cb:24209.31,gd:17684.97},
-  {t:'VXUS', n:'Vanguard Total Intl Stock ETF',   sh:483.02,p:78.13, cls:'Intl Developed', er:.07,acct:'Indiv/Roth',  tax:'Mixed',      cb:26091.64,gd:12016.16},
-  {t:'AAPL', n:'Apple Inc',                       sh:96.42, p:253.47,cls:'US Large Growth',er:0,  acct:'Individual',  tax:'Taxable',    cb:3353.88, gd:21147.99},
-  {t:'VTI',  n:'Vanguard Total Stock Mkt ETF',    sh:66.15, p:330.00,cls:'US Blend',       er:.03,acct:'Roth IRA',   tax:'Non-Taxable',cb:17568.02,gd:5337.31},
-  {t:'VTV',  n:'Vanguard Value ETF',              sh:95.58, p:198.82,cls:'US Large Value',  er:.04,acct:'Roth IRA',   tax:'Non-Taxable',cb:13538.97,gd:5579.84},
-  {t:'NVDA', n:'NVIDIA Corp',                     sh:100.31,p:184.57,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1212.08, gd:17077.00},
-  {t:'AVUV', n:'Avantis US Small Cap Value ETF',  sh:168.04,p:107.40,cls:'US Small Value',  er:.25,acct:'Roth IRA',   tax:'Non-Taxable',cb:12790.22,gd:5362.16},
-  {t:'SNSXX',n:'Schwab Treasury Obligations MM',  sh:17749, p:1.00,  cls:'Cash',            er:0,  acct:'Individual',  tax:'Taxable',    cb:17749.65,gd:0},
-  {t:'EMXC', n:'iShares MSCI EM ex China ETF',    sh:211.41,p:80.26, cls:'Emerging Markets',er:.25,acct:'Roth IRA',   tax:'Non-Taxable',cb:14456.04,gd:2769.27},
-  {t:'AMZN', n:'Amazon.com Inc',                  sh:80,    p:209.41,cls:'US Large Growth',er:0,  acct:'Individual',  tax:'Taxable',    cb:2349.59, gd:14752.06},
+  {t:'AAPL', n:'Apple Inc', sh:96.4201, p:258.9, cls:'US Large Growth', er:0, acct:'Individual', tax:'Taxable', cb:3353.88, gd:21609.28},
+  {t:'AMZN', n:'Amazon.com Inc', sh:80, p:221.25, cls:'US Large Growth', er:0, acct:'Individual', tax:'Taxable', cb:2349.59, gd:15350.41},
+  {t:'VXUS', n:'Vanguard Total Intl Stock ETF', sh:228.2025, p:81.23, cls:'Intl Developed', er:0.07, acct:'Individual', tax:'Taxable', cb:11127.27, gd:7409.62},
+  {t:'VFIAX', n:'Vanguard 500 Index Admiral', sh:24.888, p:626.0599, cls:'US Blend', er:0.04, acct:'Individual', tax:'Taxable', cb:5403.53, gd:10177.85},
+  {t:'SNSXX', n:'Schwab Treasury Obligations MM', sh:17799.07, p:1.0, cls:'Cash', er:0, acct:'Individual', tax:'Taxable', cb:17799.07, gd:0.0},
+  {t:'AAOI', n:'Applied Optoelectronics Inc', sh:18, p:132.7, cls:'Biotech', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1704.66, gd:683.94},
+  {t:'AGX', n:'Argan Inc', sh:7.1978, p:588.2798, cls:'US Industrials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:805.56, gd:3428.76},
+  {t:'AMD', n:'Advanced Micro Devices', sh:13, p:231.82, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1263.72, gd:1749.94},
+  {t:'ASTS', n:'AST SpaceMobile Inc', sh:16, p:96.46, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1490.56, gd:52.8},
+  {t:'AVAV', n:'AeroVironment Inc', sh:9, p:186.94, cls:'Defense', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1642.95, gd:39.51},
+  {t:'AVGO', n:'Broadcom Inc', sh:7.1613, p:350.6305, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1158.64, gd:1352.33},
+  {t:'AXTI', n:'AXT Inc', sh:34, p:53.18, cls:'US Industrials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1948.19, gd:-140.07},
+  {t:'CCJ', n:'Cameco Corp', sh:13, p:115.9, cls:'Energy/Power', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1195.35, gd:311.35},
+  {t:'CEG', n:'Constellation Energy Corp', sh:8.0641, p:284.2698, cls:'Energy/Power', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:2138.4, gd:153.98},
+  {t:'CORZ', n:'Core Scientific Inc', sh:95, p:17.66, cls:'Crypto/Digital', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1153.64, gd:524.06},
+  {t:'CRS', n:'Carpenter Technology Corp', sh:6.0614, p:427.8401, cls:'US Industrials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:751.76, gd:1841.55},
+  {t:'CRWD', n:'CrowdStrike Holdings Inc', sh:4, p:426.51, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1177.14, gd:528.9},
+  {t:'FCFS', n:'FirstCash Holdings Inc', sh:7, p:198.84, cls:'Financials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1388.13, gd:3.75},
+  {t:'GOOGL', n:'Alphabet Inc', sh:5.4215, p:317.3199, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:511.65, gd:1208.7},
+  {t:'HTFL', n:'Heartflow Inc', sh:37, p:27.08, cls:'Biotech', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1278.91, gd:-276.95},
+  {t:'IREN', n:'Iris Energy Ltd', sh:78, p:36.83, cls:'Crypto/Digital', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:625.09, gd:2247.65},
+  {t:'ISRG', n:'Intuitive Surgical Inc', sh:4, p:462.28, cls:'Biotech', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1595.09, gd:254.03},
+  {t:'KRKNF', n:'Kraken Robotics Inc', sh:220, p:6.08, cls:'Defense', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1069.99, gd:267.61},
+  {t:'LHX', n:'L3Harris Technologies', sh:6.1666, p:361.9693, cls:'Defense', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1607.32, gd:624.8},
+  {t:'LITE', n:'Lumentum Holdings Inc', sh:1, p:896.02, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:719.8, gd:176.22},
+  {t:'MSFT', n:'Microsoft Corp', sh:4.3347, p:374.3304, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1337.99, gd:284.62},
+  {t:'NBIS', n:'Nebius Group', sh:23, p:125.0, cls:'Biotech', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1998.59, gd:876.41},
+  {t:'NRG', n:'NRG Energy Inc', sh:18.2735, p:160.2999, cls:'Energy/Power', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1770.35, gd:1158.89},
+  {t:'NVDA', n:'NVIDIA Corp', sh:100.3203, p:182.08, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1213.08, gd:17053.24},
+  {t:'OKLO', n:'Oklo Inc', sh:23, p:50.21, cls:'Energy/Power', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:543.86, gd:610.97},
+  {t:'ONDS', n:'Ondas Inc', sh:135, p:9.45, cls:'Defense', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1399.28, gd:-123.53},
+  {t:'PANW', n:'Palo Alto Networks Inc', sh:12, p:173.78, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1023.34, gd:1062.02},
+  {t:'PLTR', n:'Palantir Technologies Inc', sh:10, p:140.76, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:278.95, gd:1128.65},
+  {t:'SIVEF', n:'Sivers Semiconductors AB', sh:750, p:1.2667, cls:'US Industrials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:956.0, gd:-6.0},
+  {t:'SOFI', n:'SoFi Technologies Inc', sh:56, p:16.49, cls:'Financials', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:886.76, gd:36.68},
+  {t:'SPOT', n:'Spotify Technology SA', sh:5, p:483.17, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1513.43, gd:902.42},
+  {t:'VRT', n:'Vertiv Holdings Co', sh:20.046, p:281.0301, cls:'US Large Growth', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1866.3, gd:3767.23},
+  {t:'VST', n:'Vistra Corp', sh:18.1514, p:155.8899, cls:'Energy/Power', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:2376.45, gd:453.17},
+  {t:'WMT', n:'Walmart Inc', sh:26.4351, p:127.26, cls:'US Large Value', er:0, acct:'Roth IRA', tax:'Non-Taxable', cb:1879.56, gd:1484.57},
+  {t:'AIRR', n:'First Trust RBA Industrial ETF', sh:138.122, p:119.16, cls:'US Industrials', er:0.7, acct:'Roth IRA', tax:'Non-Taxable', cb:13548.71, gd:2909.91},
+  {t:'AVUV', n:'Avantis US Small Cap Value ETF', sh:168.0387, p:114.74, cls:'US Small Value', er:0.25, acct:'Roth IRA', tax:'Non-Taxable', cb:12790.22, gd:6490.54},
+  {t:'DFIV', n:'Dimensional Intl Value ETF', sh:267.6969, p:55.06, cls:'Intl Value', er:0.27, acct:'Roth IRA', tax:'Non-Taxable', cb:9939.0, gd:4800.39},
+  {t:'EMXC', n:'iShares MSCI EM ex China ETF', sh:211.4054, p:84.8, cls:'Emerging Markets', er:0.25, acct:'Roth IRA', tax:'Non-Taxable', cb:14456.04, gd:3471.14},
+  {t:'GLTR', n:'abrdn Physical Prec Metals ETF', sh:19, p:220.0, cls:'Commodities', er:0.6, acct:'Roth IRA', tax:'Non-Taxable', cb:4706.02, gd:-526.02},
+  {t:'INFL', n:'Horizon Kinetics Inflation ETF', sh:232.3471, p:53.12, cls:'Real Assets', er:0.85, acct:'Roth IRA', tax:'Non-Taxable', cb:9862.36, gd:2479.92},
+  {t:'PAVE', n:'Global X Infrastructure Dev ETF', sh:147, p:53.89, cls:'US Industrials', er:0.47, acct:'Roth IRA', tax:'Non-Taxable', cb:7743.23, gd:178.6},
+  {t:'SETM', n:'Sprott Energy Transition ETF', sh:63, p:35.16, cls:'Energy Transition', er:0.65, acct:'Roth IRA', tax:'Non-Taxable', cb:2292.07, gd:-76.99},
+  {t:'SHLD', n:'Global X Defense Tech ETF', sh:60, p:74.96, cls:'Defense', er:0.5, acct:'Roth IRA', tax:'Non-Taxable', cb:4467.3, gd:30.3},
+  {t:'VB', n:'Vanguard Small-Cap ETF', sh:46.7318, p:273.0999, cls:'US Small Blend', er:0.05, acct:'Roth IRA', tax:'Non-Taxable', cb:8983.95, gd:3778.5},
+  {t:'VTI', n:'Vanguard Total Stock Mkt ETF', sh:60.3432, p:333.7001, cls:'US Blend', er:0.03, acct:'Roth IRA', tax:'Non-Taxable', cb:14677.74, gd:5458.79},
+  {t:'VTV', n:'Vanguard Value ETF', sh:96.1116, p:201.98, cls:'US Large Value', er:0.04, acct:'Roth IRA', tax:'Non-Taxable', cb:13642.12, gd:5770.5},
+  {t:'VXUS', n:'Vanguard Total Intl Stock ETF', sh:255.3234, p:81.23, cls:'Intl Developed', er:0.07, acct:'Roth IRA', tax:'Non-Taxable', cb:15002.77, gd:5737.15},
+  {t:'XAR', n:'SPDR S&P Aero & Defense ETF', sh:34.0142, p:271.6901, cls:'Defense', er:0.35, acct:'Roth IRA', tax:'Non-Taxable', cb:9627.5, gd:-386.18},
+  {t:'XBI', n:'SPDR S&P Biotech ETF', sh:95.442, p:130.65, cls:'Biotech', er:0.35, acct:'Roth IRA', tax:'Non-Taxable', cb:8417.08, gd:4052.42},
+  {t:'RLY', n:'SSGA Multi-Asset Real Return ETF', sh:280.2739, p:36.53, cls:'Real Assets', er:0.5, acct:'Rollover IRA', tax:'Non-Taxable', cb:9974.75, gd:263.66},
+  {t:'VT', n:'Vanguard Total World ETF', sh:294.8911, p:144.58, cls:'US Blend', er:0.07, acct:'Rollover IRA', tax:'Non-Taxable', cb:24305.57, gd:18329.79},
+
+  // 401K & HSA holdings (Fidelity / Optum — no cost basis)
   
-  {t:'AIRR', n:'First Trust RBA Industrial ETF',  sh:138.04,p:109.95,cls:'US Industrials',  er:.70,acct:'Roth IRA',   tax:'Non-Taxable',cb:13539.49,gd:1768.12},
-  {t:'DFIV', n:'Dimensional Intl Value ETF',      sh:267.18,p:52.38, cls:'Intl Value',      er:.27,acct:'Roth IRA',   tax:'Non-Taxable',cb:9912.05, gd:4249.59},
-  {t:'VB',   n:'Vanguard Small-Cap ETF',          sh:46.56, p:264.19,cls:'US Small Blend',  er:.05,acct:'Roth IRA',   tax:'Non-Taxable',cb:8938.27, gd:3435.34},
-  {t:'INFL', n:'Horizon Kinetics Inflation ETF',  sh:231.99,p:52.38, cls:'Real Assets',     er:.85,acct:'Roth IRA',   tax:'Non-Taxable',cb:9843.80, gd:2408.52},
-  {t:'XBI',  n:'SPDR S&P Biotech ETF',            sh:95.44, p:124.24,cls:'Biotech',         er:.35,acct:'Roth IRA',   tax:'Non-Taxable',cb:8417.08, gd:3463.54},
-  {t:'RLY',  n:'SSGA Multi-Asset Real Return ETF',sh:280,   p:35.97, cls:'Real Assets',     er:.50,acct:'Rollover IRA',tax:'Non-Taxable',cb:9964.86, gd:179.54},
-  {t:'XAR',  n:'SPDR S&P Aerospace & Defense ETF',sh:34,   p:268.50,cls:'Defense',          er:.35,acct:'Roth IRA',   tax:'Non-Taxable',cb:9623.70, gd:-400.86},
-  {t:'PAVE', n:'Global X Infrastructure Dev ETF', sh:147,   p:50.66, cls:'US Industrials',  er:.47,acct:'Roth IRA',   tax:'Non-Taxable',cb:7743.23, gd:-277.10},
-  {t:'VRT',  n:'Vertiv Holdings Co',              sh:20.04, p:267.38,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1865.05, gd:3512.17},
-  {t:'SHLD', n:'Global X Defense Tech ETF',       sh:60,    p:76.02, cls:'Defense',          er:.50,acct:'Roth IRA',   tax:'Non-Taxable',cb:4467.30, gd:111.30},
-  {t:'GLTR', n:'abrdn Physical Prec Metals ETF',  sh:19,    p:233.74,cls:'Commodities',      er:.60,acct:'Roth IRA',   tax:'Non-Taxable',cb:4706.02, gd:-235.89},
-  {t:'IREN', n:'Iris Energy Ltd',                 sh:78,    p:44.33, cls:'Crypto/Digital',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:625.09,  gd:2774.71},
-  {t:'AGX',  n:'Argan Inc',                       sh:7.2,   p:473.19,cls:'US Industrials',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:805.56,  gd:2568.26},
-  {t:'WMT',  n:'Walmart Inc',                     sh:26.38, p:125.05,cls:'US Large Value',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1873.03, gd:1447.35},
-  {t:'VST',  n:'Vistra Corp',                     sh:18.12, p:161.94,cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:2372.32, gd:600.02},
-  {t:'NBIS', n:'Nebius Group',                    sh:23,    p:126.36,cls:'Biotech',         er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1998.59, gd:651.82},
-  {t:'NRG',  n:'NRG Energy Inc',                  sh:18.27, p:153.18,cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1770.35, gd:1043.22},
-  {t:'SPOT', n:'Spotify Technology SA',           sh:5,     p:521.63,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1513.43, gd:1142.62},
-  {t:'AMD',  n:'Advanced Micro Devices',          sh:13,    p:199.10,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1263.72, gd:1299.03},
-  {t:'FCFS', n:'FirstCash Holdings Inc',          sh:7,     p:192.92,cls:'Financials',      er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:2577.95, gd:-78.96},
-  {t:'CEG',  n:'Constellation Energy Corp',       sh:8.05,  p:304.95,cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:2134.97, gd:333.00},
-  {t:'AVGO', n:'Broadcom Inc',                    sh:7.15,  p:328.63,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1154.00, gd:1147.73},
-  {t:'CRS',  n:'Carpenter Technology Corp',       sh:6.06,  p:373.38,cls:'US Industrials',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:751.76,  gd:1519.84},
-  {t:'LHX',  n:'L3Harris Technologies',           sh:6.15,  p:365.86,cls:'Defense',          er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1599.64, gd:640.96},
-    {t:'SETM', n:'Sprott Energy Transition Matls',  sh:63,    p:33.07, cls:'Energy Transition',er:.65,acct:'Roth IRA',   tax:'Non-Taxable',cb:2292.07, gd:-161.41},
-  {t:'PANW', n:'Palo Alto Networks Inc',          sh:12,    p:167.29,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1023.34, gd:1019.30},
-  {t:'ISRG', n:'Intuitive Surgical Inc',          sh:4,     p:483.43,cls:'Biotech',         er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1595.09, gd:360.69},
-  {t:'AVAV', n:'AeroVironment Inc',               sh:9,     p:207.50,cls:'Defense',          er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1642.95, gd:303.30},
-  {t:'MSFT', n:'Microsoft Corp',                  sh:4.33,  p:397.87,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1337.99, gd:393.30},
-  {t:'CRWD', n:'CrowdStrike Holdings Inc',        sh:4,     p:429.53,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1177.14, gd:559.98},
-  {t:'GOOGL',n:'Alphabet Inc',                    sh:5.41,  p:303.93,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:511.65,  gd:1150.35},
-  {t:'CORZ', n:'Core Scientific Inc',             sh:95,    p:16.79, cls:'Crypto/Digital',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1153.64, gd:427.98},
-  {t:'PLTR', n:'Palantir Technologies Inc',       sh:10,    p:152.02,cls:'US Large Growth',er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:278.95,  gd:1265.60},
-  {t:'KRKNF',n:'Kraken Robotics Inc',             sh:220,   p:6.74,  cls:'Defense',          er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1069.99, gd:526.77},
-  {t:'CCJ',  n:'Cameco Corp',                     sh:13,    p:109.42,cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1195.35, gd:280.62},
-  {t:'ONDS', n:'Ondas Inc',                       sh:135,   p:10.39, cls:'Defense',          er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1399.28, gd:36.94},
-  {t:'OKLO', n:'Oklo Inc',                        sh:23,    p:58.33, cls:'Energy/Power',    er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:543.86,  gd:871.29},
-  {t:'SOFI', n:'SoFi Technologies Inc',           sh:56,    p:17.91, cls:'Financials',      er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:886.76,  gd:113.32},
-  {t:'HTFL', n:'Heartflow Inc',                   sh:37,    p:21.24, cls:'Biotech',         er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1278.91, gd:-455.84},
-  // New positions added 3/20–3/26/2026
-  {t:'AAOI',  n:'Applied Optoelectronics Inc',       sh:18,    p:94.70, cls:'Biotech',         er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1704.66, gd:0},
-  {t:'ASTS',  n:'AST SpaceMobile Inc',               sh:16,    p:93.16, cls:'US Large Growth',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1490.56, gd:0},
-  {t:'AXTI',  n:'AXT Inc',                           sh:19,    p:67.80, cls:'US Industrials',   er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:1288.20, gd:0},
-  {t:'LITE',  n:'Lumentum Holdings Inc',             sh:1,     p:719.80,cls:'US Large Growth',  er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:719.80,  gd:0},
-  {t:'SIVEF', n:'Sivers Semiconductors AB',          sh:750,   p:1.21,  cls:'US Industrials',   er:0,  acct:'Roth IRA',   tax:'Non-Taxable',cb:907.50,  gd:0},
-    // 401K & HSA holdings (no cost basis available)
-  {t:'VFIAX', n:'Vanguard 500 Index Admiral', sh:40.5572, p:613.72, cls:'US Blend', er:0.04, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
+  {t:'VFIAX', n:'Vanguard 500 Index Admiral',    sh:41.0838, p:613.72,cls:'US Blend',       er:.04,acct:'401K',        tax:'Non-Taxable', cb:0,        gd:0},
   {t:'VFWAX', n:'Vanguard FTSE All-World ex-US Adm.', sh:207.8043, p:46.54, cls:'Intl Developed', er:0.1, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
   {t:'VEMAX', n:'Vanguard Emerging Markets Adm.', sh:216.4067, p:45.0, cls:'Emerging Markets', er:0.14, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
   {t:'VEIRX', n:'Vanguard Equity-Income Adm.', sh:265.5533, p:94.16, cls:'US Large Value', er:0.18, acct:'401K', tax:'Non-Taxable', cb:0, gd:0},
@@ -645,7 +647,7 @@ const CC={'US Blend':'#2980b9','US Large Growth':'#1fb8a0','US Large Value':'#3a
   'Commodities':'#7a4a10','Biotech':'#c4537e','Energy/Power':'#e07020',
   'Crypto/Digital':'#9b6bff','Cash':'#555e7a','Real Estate':'#0f6e56',
   'Energy Transition':'#3b8d11','Financials':'#993c1d','Consumer Disc.':'#6a7080'};
-const AC2={'Roth IRA':'#1fb8a0','Individual':'#f59e0b','Rollover IRA':'#4a9eff','Indiv/Roth':'#9b6bff','401K':'#9b6bff','HSA':'#22c55e'};
+const AC2={'Roth IRA':'#1fb8a0','Individual':'#f59e0b','Rollover IRA':'#4a9eff','401K':'#9b6bff','HSA':'#22c55e'};
 
 // State
 let LP={};
@@ -1036,7 +1038,14 @@ function renderAlloc(){
     <div class="ar"><span class="al">${n}</span>
     <div class="bt"><div class="bf" style="width:${p}%;background:${c}80;border-right:2px solid ${c}"></div></div>
     <span class="ap" style="color:${c}">${p}%</span></div>`).join('');
-  const AT=[['Roth IRA',254619,'#1fb8a0'],['401K',101174,'#9b6bff'],['Individual',74734,'#f59e0b'],['Rollover IRA',52039,'#4a9eff'],['HSA',12223,'#22c55e']];
+  const AT_CFG=[
+    ['Roth IRA',    '#1fb8a0'],
+    ['401K',        '#9b6bff'],
+    ['Individual',  '#f59e0b'],
+    ['Rollover IRA','#4a9eff'],
+    ['HSA',         '#22c55e'],
+  ];
+  const AT = AT_CFG.map(([name,col])=>[name, Math.round(H.filter(h=>h.acct===name).reduce((s,h)=>s+lv(h),0)), col]).filter(a=>a[1]>0);
   const tot=AT.reduce((s,a)=>s+a[1],0);
   document.getElementById('acct-bars').innerHTML=AT.map(([k,v,col])=>{
     const p=v/tot*100;
@@ -1273,8 +1282,8 @@ function renderERCharts(){
   erC=new Chart(el,{type:'line',data:{
     labels:yrs.map(y=>y===0?'Now':'Yr '+y),
     datasets:[
-      {label:'Current 0.16%',data:yrs.map(y=>529000*(1-Math.pow(1-.00160,y))),borderColor:'rgba(240,64,96,.8)',borderWidth:2,backgroundColor:'rgba(240,64,96,.08)',fill:true,pointRadius:0},
-      {label:'Optimized 0.10%',data:yrs.map(y=>529000*(1-Math.pow(1-.00098,y))),borderColor:'rgba(31,184,160,.8)',borderWidth:2,backgroundColor:'rgba(31,184,160,.08)',fill:true,pointRadius:0}
+      {label:'Current 0.16%',data:yrs.map(y=>533000*(1-Math.pow(1-.00160,y))),borderColor:'rgba(240,64,96,.8)',borderWidth:2,backgroundColor:'rgba(240,64,96,.08)',fill:true,pointRadius:0},
+      {label:'Optimized 0.10%',data:yrs.map(y=>533000*(1-Math.pow(1-.00098,y))),borderColor:'rgba(31,184,160,.8)',borderWidth:2,backgroundColor:'rgba(31,184,160,.08)',fill:true,pointRadius:0}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
     scales:{x:{ticks:{color:'#555e7a',font:{size:9},maxTicksLimit:6},grid:{color:'rgba(255,255,255,.04)'}},
             y:{ticks:{color:'#555e7a',font:{size:9},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'rgba(255,255,255,.04)'}}}}});
@@ -1593,7 +1602,7 @@ function renderOppOutput(text){
     const userPrompt = `You are the Chief Investment Officer of a $50B multi-family office. Your analysis is read by sophisticated investors who will see through anything generic. Every recommendation must be grounded in real financials, real macro conditions, and genuine insight. Think in terms of risk-adjusted returns, not just upside.
 
 PORTFOLIO CONTEXT:
-- Total value: ${fv(tv,0)} | 62 positions across Roth IRA, 401K, Rollover IRA, Individual (Schwab), HSA (Optum)
+- Total value: ${fv(tv,0)} | 66 positions across Roth IRA, 401K, Rollover IRA, Individual (Schwab), HSA (Optum)
 - Age 35 | Aggressive growth mandate | 86% non-taxable accounts | 0% bonds
 - Top 15: ${top15}
 - All tickers held: ${allTickers}
